@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace FieldofVision
 {
-    public static class SocketServer
+    public class SocketServer
     {
         // Thread signal.  
         public static ManualResetEvent allDone = new ManualResetEvent(false);
@@ -115,16 +115,30 @@ namespace FieldofVision
             if (bytesRead > 0)
             {
                 // There  might be more data, so store the data received so far.  
-                state.sb.Append(Encoding.ASCII.GetString(
-                    state.buffer, 0, bytesRead));
+                var msg = Encoding.ASCII.GetString(state.buffer, 0, bytesRead);
 
-                // Check for end-of-file tag. If it is not there, read
-                // more data.  
-                content = state.sb.ToString();
+                state.sb.Append(msg); // store
 
                 Debug.Log(string.Format("Read {0} bytes from socket. \n Data : {1}",
-                        content.Length, content));
+                        msg.Length, msg));
 
+                // Handle this message here
+                if (msg.Contains("OPI_CLOSE"))
+                {
+                    Debug.Log("Received command to close socket.");
+                    handler.Shutdown(SocketShutdown.Both);
+                    handler.Close();
+                    return;
+                }
+
+                // Tell Unity we have received a message.
+                // Change this to an event handler?
+                lock (UnityOPI.Messages)
+                {
+                    UnityOPI.Messages.Enqueue(msg);
+                }
+
+                // Keep watching for more messages.
                 handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
                     new AsyncCallback(ReadCallback), state);
             }

@@ -5,6 +5,7 @@ using System.Threading;
 using OPI_.NET;
 using OPI_.NET.StimulusTypes;
 using UnityEngine;
+using Unity.Collections;
 
 namespace FieldofVision
 {
@@ -13,7 +14,9 @@ namespace FieldofVision
     /// </summary>
     public class UnityOPI : MonoBehaviour, IOPI
     {
-        System.Threading.Thread SocketThread;
+        private Thread SocketThread;
+
+        internal static Queue<string> Messages = new Queue<string>();
 
         /// <summary>
         /// Reference to the Stimulus Prefab. A Prefab is drug into this field in the Inspector.
@@ -56,12 +59,6 @@ namespace FieldofVision
 
         public List<Response> Responses = new List<Response>();
 
-        private System.Random random = new System.Random();
-
-        /// <summary>
-        /// Index of current test being stepped.
-        /// </summary>
-        private int CurrentTest { get; set; } = 0;
         
         #region Flow Methods
         /// <summary>
@@ -103,13 +100,11 @@ namespace FieldofVision
 
         void OnDisable()
         {
-            //stop thread
+            // Abort thread
             if (SocketThread != null)
             {
                 SocketThread.Abort();
             }
-
-            //SocketServer.StopListening();
         }
 
         #endregion

@@ -10,10 +10,12 @@ namespace FieldofVision
     public class SocketServer
     {
         // Thread signal.  
-        public static ManualResetEvent allDone = new ManualResetEvent(false);
+        private ManualResetEvent allDone = new ManualResetEvent(false);
+
+        internal static Socket Listener;
 
         // State object for reading client data asynchronously  
-        public class StateObject
+        private class StateObject
         {
             // Size of receive buffer.  
             public const int BufferSize = 1024;
@@ -31,58 +33,56 @@ namespace FieldofVision
         /// <summary> 	
         /// Setup socket server. 	
         /// </summary> 	
-        internal static void StartListening()
+        internal void StartListening()
         {
             // Establish the local endpoint for the socket.  
             IPAddress ipAddress = IPAddress.Parse("127.0.0.1");
             IPEndPoint localEndPoint = new IPEndPoint(ipAddress, 50008);
 
             // Create a TCP/IP socket.  
-            Socket listener = new Socket(ipAddress.AddressFamily,
+            Listener = new Socket(ipAddress.AddressFamily,
                 SocketType.Stream, ProtocolType.Tcp);
 
             Debug.Log("Opening server on " + localEndPoint.ToString());
 
             // Bind the socket to the local endpoint and listen for incoming connections.  
-            try
+            Listener.Bind(localEndPoint);
+            Listener.Listen(100);
+            string data = string.Empty;
+
+            while (!MainExecution.Shutdown)
             {
-                listener.Bind(localEndPoint);
-                listener.Listen(100);
-                string data = string.Empty;
+                // Set the event to nonsignaled state.  
+                allDone.Reset();
 
-                while (true)
-                {
-                    // Set the event to nonsignaled state.  
-                    allDone.Reset();
+                // Start an asynchronous socket to listen for connections.  
+                Listener.BeginAccept(new AsyncCallback(AcceptCallback), Listener);
 
-                    // Start an asynchronous socket to listen for connections.  
-                    listener.BeginAccept(new AsyncCallback(AcceptCallback), listener);
-
-                    // Wait until a connection is made before continuing.  
-                    allDone.WaitOne();
-                }
+                // Wait until a connection is made before continuing.  
+                allDone.WaitOne();
             }
-            catch (ThreadAbortException)
-            {
-                Debug.Log("Thread aborted.");
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e.ToString());
-            }
-
-            Debug.Log("Closing the listener.");
+            Debug.Log("Shutting down Socket Server.");
         }
 
-        public static void AcceptCallback(IAsyncResult ar)
+        private void AcceptCallback(IAsyncResult ar)
         {
             // Signal the main thread to continue looking for new connections.
-            Debug.Log("Socket connected.");
+            if(!MainExecution.Shutdown)
+                Debug.Log("Socket connected.");
             allDone.Set();
 
             // Get the socket that handles the client request.  
             Socket listener = (Socket)ar.AsyncState;
-            Socket handler = listener.EndAccept(ar);
+            Socket handler;
+            try
+            {
+                handler = listener.EndAccept(ar);
+            }
+            catch (ObjectDisposedException) 
+            {
+                // Shutting down, return from method.
+                return;
+            }
 
             // Create the state object.  
             StateObject state = new StateObject();
@@ -91,7 +91,7 @@ namespace FieldofVision
                 new AsyncCallback(ReadCallback), state);
         }
 
-        public static void ReadCallback(IAsyncResult ar)
+        private void ReadCallback(IAsyncResult ar)
         {
             string content = string.Empty;
 
@@ -122,29 +122,25 @@ namespace FieldofVision
                 Debug.Log(string.Format("Read {0} bytes from socket. \n Data : {1}",
                         msg.Length, msg));
 
-                // Handle this message here
-                if (msg.Contains("OPI_CLOSE"))
-                {
-                    Debug.Log("Received command to close socket.");
-                    handler.Shutdown(SocketShutdown.Both);
-                    handler.Close();
-                    return;
-                }
-
-                // Tell Unity we have received a message.
-                // Change this to an event handler?
-                lock (UnityOPI.Messages)
-                {
-                    UnityOPI.Messages.Enqueue(msg);
-                }
+                // Add message to processing queue.
+                Debug.Log("Enqueueing message.");
+                MainExecution.Messages.Enqueue(msg);
 
                 // Keep watching for more messages.
-                handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-                    new AsyncCallback(ReadCallback), state);
+                if (!MainExecution.Shutdown)
+                {
+                    handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
+                        new AsyncCallback(ReadCallback), state);
+                }
+                else 
+                {
+                    handler.Shutdown(SocketShutdown.Both);
+                    handler.Close();
+                }
             }
         }
 
-        private static void Send(Socket handler, string data)
+        private void Send(Socket handler, string data)
         {
             // Convert the string data to byte data using ASCII encoding.  
             byte[] byteData = Encoding.ASCII.GetBytes(data);
@@ -154,28 +150,21 @@ namespace FieldofVision
                 new AsyncCallback(SendCallback), handler);
         }
 
-        private static void SendCallback(IAsyncResult ar)
+        private void SendCallback(IAsyncResult ar)
         {
-            try
-            {
-                // Retrieve the socket from the state object.  
-                Socket handler = (Socket)ar.AsyncState;
+            // Retrieve the socket from the state object.  
+            Socket handler = (Socket)ar.AsyncState;
 
-                // Complete sending the data to the remote device.  
-                int bytesSent = handler.EndSend(ar);
-                Debug.Log(string.Format("Sent {0} bytes to client.", bytesSent));
+            // Complete sending the data to the remote device.  
+            int bytesSent = handler.EndSend(ar);
+            Debug.Log(string.Format("Sent {0} bytes to client.", bytesSent));
 
-                handler.Shutdown(SocketShutdown.Both);
-                handler.Close();
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e.ToString());
-            }
+            handler.Shutdown(SocketShutdown.Both);
+            handler.Close();
         }
 
         // Check if socket is still connected
-        private static bool SocketConnected(Socket s)
+        private bool SocketConnected(Socket s)
         {
             bool part1 = s.Poll(1000, SelectMode.SelectRead);
             bool part2 = (s.Available == 0);

@@ -1,11 +1,9 @@
-using OPI_.NET;
-
 namespace FieldofVision
 {
     /// <summary>
     /// This class defines the OPI implementation on a VIVE device using Unity.
     /// </summary>
-    public class ViveProEye : IUnityDevice
+    public class ViveProEye
     {
         ///<inheritdoc />
         public double MinStimulus { get; set; } = 10;

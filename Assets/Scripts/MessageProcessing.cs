@@ -54,12 +54,18 @@ namespace FieldofVision
             theMethod.Invoke(this, new[] { message });
         }
 
+        /// <summary>
+        /// Close socket connection and exit program.
+        /// </summary>
         private void OPI_CLOSE(string message)
         {
             Debug.Log("OPI_CLOSE");
-            MainExecution.RunShutdownHelper();
+            MainExecution.RunShutdown();
         }
 
+        /// <summary>
+        /// Return the resolution of the VR device.
+        /// </summary>
         private void OPI_GET_RES(string message)
         {
             Debug.Log("OPI_GET_RES");
@@ -119,10 +125,12 @@ namespace FieldofVision
                 ResponseWindow = double.Parse(parameters[6]),
             };
 
-            
             var response = MainExecution.PresentationControl.Present(stim);
         }
 
+        /// <summary>
+        ///  Set field of view in the y-axis in degrees of visual angle
+        /// </summary>
         private void OPI_SET_FOVY(string message)
         {
             Debug.Log("OPI_SET_FOVY");

@@ -3,8 +3,6 @@ using UnityEngine;
 using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
-using System.Collections;
-
 namespace FieldofVision
 {
     /// <summary>
@@ -58,7 +56,7 @@ namespace FieldofVision
 
         void OnDisable()
         {
-            RunShutdownHelper();
+            RunShutdown();
         }
 
         //called when an instance awakes in the game
@@ -67,20 +65,16 @@ namespace FieldofVision
             instance = this; //set our static reference to our newly initialized instance
         }
 
-        private static IEnumerator RunShutdown() 
+        internal static void RunShutdown() 
         {
             Shutdown = true;
             if(SocketServer.Listener != null)
-                   SocketServer.Listener.Close();
+               SocketServer.Listener.Close();
 
             if (!SocketServerTask.IsCompleted)
                 SocketServerTask.Wait();
 
-            while (!InputProcessing.Exited)
-                yield return new WaitForSeconds(1f);
-
-            while (!MessageProcessing.Exited)
-                yield return new WaitForSeconds(1f);
+            instance.StopAllCoroutines();
 
             #if UNITY_EDITOR
                 // Application.Quit() does not work in the editor so
@@ -89,11 +83,6 @@ namespace FieldofVision
             #else
                 Application.Quit();
             #endif
-        }
-
-        public static void RunShutdownHelper() 
-        {
-            ExecuteOnMainThread.Enqueue(() => { instance.StartCoroutine(RunShutdown()); });
         }
     }
 }

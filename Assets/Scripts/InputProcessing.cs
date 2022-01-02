@@ -3,27 +3,30 @@ using UnityEngine;
 
 namespace FieldofVision
 {
-    public class InputProcessing
+    internal class InputProcessing : MonoBehaviour
     {
-        internal static bool Exited = false;
+        internal bool KeyPressed = false;
+
+        internal float KeyPressedTime = 0;
+
+        internal MainExecution Main { get; set; }
+
         internal IEnumerator WaitForInput()
         {
+            Debug.Log("Wait for input started.");
             // handle messages
-            while (!MainExecution.Shutdown)
+            while (!Main.Shutdown)
             {
                 // Only record input once for each presentation.
                 if (Input.anyKeyDown)
                 {
                     // Record seen and response time in ms.
-                    //var keyPressed = true;
-                    //var keyPressedTime = (float)(Time.time - keyPressedTime);
-                    Debug.Log("Key pressed at time: " + Time.time);
-                    //if (keyPressedTime <= 0) Debug.LogError("Error, key pressed time: " + keyPressedTime);
+                    KeyPressed = true;
+                    KeyPressedTime = Time.time;
+                    Debug.Log("Key pressed at time: " + KeyPressedTime);
                 }
                 yield return null; // wait until next frame
             }
-            Exited = true;
-            Debug.Log("Shutting down Input Processing.");
         }
     }
 }

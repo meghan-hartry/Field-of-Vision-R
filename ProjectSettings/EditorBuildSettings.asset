@@ -8,4 +8,8 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/VisionTest.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
-  m_configObjects: {}
+  m_configObjects:
+    Unity.XR.OpenVR.Settings: {fileID: 11400000, guid: 6c20a19ada95bb240bb091a56ba38c70, type: 2}
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 1f21d8a5ddbe54140809f6afb6c0ac53, type: 2}
+    com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 5da12d919309c6540a049084ce8691bc, type: 2}
+    xr.sdk.mock-hmd.settings: {fileID: 11400000, guid: 0fb66cac93769fe44972f3f4213435b5, type: 2}

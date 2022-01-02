@@ -13,27 +13,40 @@ namespace FieldofVision
         /// </summary>
         private GameObject StimulusObj;
 
-        private List<Response> Responses = new List<Response>();
+        /// <summary>
+        /// Active Camera GameObject in Unity.
+        /// </summary>
+        private GameObject ActiveCamera;
+
+        /// <summary>
+        /// Inactive Camera GameObject in Unity.
+        /// </summary>
+        private GameObject InactiveCamera;
+
+        internal List<Response> Responses = new List<Response>();
 
         /// <summary>
         /// Status of presentation. Used for flow control.
         /// </summary>
-        private bool presentDone;
+        internal bool PresentDone = false;
+
+        internal float PresentationStartTime;
 
         internal ViveProEye Device { get; private set; } = new ViveProEye();
+
+        internal MainExecution Main { get; set; }
 
         /// <summary>
         /// Helper method for PresentCoroutine.
         /// </summary>
         /// <inheritdoc cref="Present"/>
-        internal Response Present(Stimulus stimulus)
+        internal void Present(Stimulus stimulus)
         {
             // Cast to StaticStimulus (can't use pattern matching with Unity).
             var staticStimulus = stimulus as StaticStimulus;
             if (staticStimulus == null) { throw new NotImplementedException(); }
             Debug.Log("Starting presentation.");
-            MainExecution.ExecuteOnMainThread.Enqueue(() => { StartCoroutine(this.PresentCoroutine(staticStimulus)); });
-            return null;
+            Main.ExecuteOnMainThread.Enqueue(() => { StartCoroutine(this.PresentCoroutine(staticStimulus)); });
         }
 
         /// <summary>
@@ -42,10 +55,10 @@ namespace FieldofVision
         /// </summary>
         private IEnumerator PresentCoroutine(StaticStimulus stimulus)
         {
-            this.presentDone = false;
+            this.PresentDone = false;
 
             // Reset keyPressed bool.
-            //this.keyPressed = false;
+            Main.InputProcessor.KeyPressed = false;
 
             //Debug.Log("Stimuli count: " + this.Tests[this.CurrentTest].Stimuli.Count);
 
@@ -56,14 +69,18 @@ namespace FieldofVision
                 yield break;
             }
 
+            Debug.Log("Eye: " + stimulus.Eye);
+            ActiveCamera = GameObject.Find("Active Camera");
+            InactiveCamera = GameObject.Find("Inactive Camera");
+            SetEye(stimulus.Eye);
+
             Debug.Log("Stimulus level: " + stimulus.Level);
             //this.SetLevel(stimulus.Level);
             this.SetPosition(stimulus.X, stimulus.Y);
             StimulusObj.GetComponent<Renderer>().enabled = true;
 
-            // Record presentation start time.
-            //this.keyPressedTime = Time.time;
-            //Debug.Log("Record presentation start time: " + this.keyPressedTime);
+            PresentationStartTime = Time.time;
+            Debug.Log("Presentation start time: " + PresentationStartTime.ToString());
 
             //yield for Duration of stimulus presentation. Convert ms to s.
             yield return new WaitForSeconds((float)stimulus.Duration / 1000);
@@ -79,11 +96,8 @@ namespace FieldofVision
                 yield return new WaitForSeconds((float)wait);
             }
 
-            var response = new Response(false);
-            /*if (this.keyPressed == true)
-            {
-                response = new Response(true, this.keyPressedTime);
-            }*/
+            var responseTime = (int) ((Main.InputProcessor.KeyPressedTime - PresentationStartTime) * 1000);
+            var response = Main.InputProcessor.KeyPressed? new Response(true, responseTime) : new Response(false);
 
             this.Responses.Add(response);
 
@@ -91,7 +105,8 @@ namespace FieldofVision
             Debug.Log("Response: " + this.Responses[this.Responses.Count - 1].Seen);
             Debug.Log("Response time: " + this.Responses[this.Responses.Count - 1].Time);
 
-            this.presentDone = true;
+            Main.MessageProcessor.WaitForResponse = false;
+            this.PresentDone = true;
         }
 
         private void SetLevel(double cd)
@@ -108,6 +123,26 @@ namespace FieldofVision
         {
             var vector = this.Device.ToVector(x, y);
             this.StimulusObj.transform.position = new Vector3(vector[0], vector[1], 0);
+        }
+
+        private void SetEye(Eye eye)
+        {
+            switch (eye) 
+            {
+                case Eye.Left:
+                    ActiveCamera.GetComponent<Camera>().stereoTargetEye = StereoTargetEyeMask.Left;
+                    InactiveCamera.GetComponent<Camera>().stereoTargetEye = StereoTargetEyeMask.Right;
+                    break;
+                case Eye.Right:
+                    ActiveCamera.GetComponent<Camera>().stereoTargetEye = StereoTargetEyeMask.Right;
+                    InactiveCamera.GetComponent<Camera>().stereoTargetEye = StereoTargetEyeMask.Left;
+                    break;
+                case Eye.Both:
+                default:
+                    ActiveCamera.GetComponent<Camera>().stereoTargetEye = StereoTargetEyeMask.Both;
+                    InactiveCamera.GetComponent<Camera>().stereoTargetEye = StereoTargetEyeMask.None;
+                    break;
+            }
         }
     }
 }

@@ -12,7 +12,8 @@ namespace FieldofVision
         // Thread signal.  
         private ManualResetEvent allDone = new ManualResetEvent(false);
 
-        internal static Socket Listener;
+        private Socket Listener;
+        private MainExecution Main;
 
         // State object for reading client data asynchronously  
         private class StateObject
@@ -28,6 +29,11 @@ namespace FieldofVision
 
             // Client socket.
             public Socket workSocket = null;
+        }
+
+        internal SocketServer(MainExecution main)
+        {
+            Main = main;
         }
 
         /// <summary> 	
@@ -50,7 +56,7 @@ namespace FieldofVision
             Listener.Listen(100);
             string data = string.Empty;
 
-            while (!MainExecution.Shutdown)
+            while (!Main.Shutdown)
             {
                 // Set the event to nonsignaled state.  
                 allDone.Reset();
@@ -61,13 +67,17 @@ namespace FieldofVision
                 // Wait until a connection is made before continuing.  
                 allDone.WaitOne();
             }
-            Debug.Log("Shutting down Socket Server.");
+            if (Listener != null)
+            {
+                Listener.Close();
+            }
+            Debug.Log("Socket Server shut down.");
         }
 
         private void AcceptCallback(IAsyncResult ar)
         {
             // Signal the main thread to continue looking for new connections.
-            if(!MainExecution.Shutdown)
+            if(!Main.Shutdown)
                 Debug.Log("Socket connected.");
             allDone.Set();
 
@@ -122,12 +132,26 @@ namespace FieldofVision
                 Debug.Log(string.Format("Read {0} bytes from socket. \n Data : {1}",
                         msg.Length, msg));
 
+                var previousCount = Main.PresentationControl.Responses.Count;
+
                 // Add message to processing queue.
                 Debug.Log("Enqueueing message.");
-                MainExecution.Messages.Enqueue(msg);
+                Main.MessageProcessor.ProcessMessage(msg);
+
+                // Wait for response
+                /*while (Main.MessageProcessor.WaitForResponse)
+                {
+                    if (Main.PresentationControl.Responses.Count > previousCount) 
+                    {
+                        var lastResponse = Main.PresentationControl.Responses[previousCount];
+                        var response = (lastResponse.Seen ? "1" : "0") + " " + lastResponse.Time.ToString();
+                        Send(handler, response);
+                        break;
+                    }
+                }*/
 
                 // Keep watching for more messages.
-                if (!MainExecution.Shutdown)
+                if (!Main.Shutdown)
                 {
                     handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
                         new AsyncCallback(ReadCallback), state);
@@ -172,6 +196,16 @@ namespace FieldofVision
                 return false;
             else
                 return true;
+        }
+
+        // Shutdown the socket server
+        internal void ForceShutdown()
+        {
+            if (Listener != null) 
+            {
+                Debug.Log("Forcing Listener Close");
+                Listener.Close();
+            }
         }
     }
 }

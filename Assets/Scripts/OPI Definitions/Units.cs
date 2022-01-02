@@ -8,7 +8,8 @@ namespace Assets.Scripts.OPI_Definitions
     public enum Eye
     {
         Left,
-        Right
+        Right,
+        Both
     }
 
     /// <summary>
@@ -20,11 +21,8 @@ namespace Assets.Scripts.OPI_Definitions
         /// Constructor requires Seen parameter to be set.
         /// Time can also be set, but defaults to double.NaN.
         /// </summary>
-        public Response(bool seen, double time = double.NaN)
+        public Response(bool seen, int time = 0)
         {
-            if (seen && double.IsNaN(time)) throw new Exception("If the stimulus is seen, response time cannot be null.");
-            if (seen && time <= 0) throw new Exception("Invalid response time.");
-
             this.Seen = seen;
             this.Time = time;
         }
@@ -38,7 +36,7 @@ namespace Assets.Scripts.OPI_Definitions
         /// The time in milliseconds from the onset (or offset) of the presentation until the response from the subject. 
         /// Value should be double.NaN if <see cref="Seen"/> is false.
         /// </summary>
-        public double Time { get; set; }
+        public int Time { get; set; }
     }
 
     /// <summary>

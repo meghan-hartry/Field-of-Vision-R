@@ -1,24 +1,31 @@
-using System.Collections.Concurrent;
 using UnityEngine;
-using System.Threading.Tasks;
 using System;
+using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Collections;
+
 namespace FieldofVision
 {
     /// <summary>
     /// This class defines the OPI implementation on Unity engine.
     /// </summary>
     public class MainExecution : MonoBehaviour
-    {
-        internal static bool Shutdown { get; private set; } = false;
+    {        
+        internal PresentationControl PresentationControl { get; private set; }
 
-        internal static ConcurrentQueue<string> Messages { get; private set; }
-        internal static Queue<Action> ExecuteOnMainThread = new Queue<Action>();
+        internal InputProcessing InputProcessor { get; private set; }
 
-        internal static PresentationControl PresentationControl { get; private set; }
+        internal SocketServer SocketServer { get; private set; }
 
-        private static Task SocketServerTask;
-        private static MainExecution instance;
+        internal MessageProcessing MessageProcessor { get; private set; }
+
+        internal Task SocketServerTask;
+
+        internal bool Shutdown { get; set; } = false;
+
+        internal Queue<Action> ExecuteOnMainThread = new Queue<Action>();
+
+        internal MainExecution MainInstance;
 
         /// <summary>
         /// Start is called before the first frame update.
@@ -29,13 +36,17 @@ namespace FieldofVision
             try
             {
                 Application.runInBackground = true;
-                Messages = new ConcurrentQueue<string>();
 
                 PresentationControl = gameObject.AddComponent<PresentationControl>();
+                PresentationControl.Main = this;
+                InputProcessor = gameObject.AddComponent<InputProcessing>();
+                InputProcessor.Main = this;
 
-                SocketServerTask = Task.Run(new SocketServer().StartListening);
-                StartCoroutine(new MessageProcessing().BeginProcessing());
-                StartCoroutine(new InputProcessing().WaitForInput());
+                SocketServer = new SocketServer(this);
+                MessageProcessor = new MessageProcessing(this);
+
+                SocketServerTask = Task.Run(SocketServer.StartListening);
+                StartCoroutine(InputProcessor.WaitForInput());
             }
             catch (Exception e)
             {
@@ -54,35 +65,33 @@ namespace FieldofVision
             }
         }
 
-        void OnDisable()
+        //called when an instance awakes in the game
+        void Awake()
+        {
+            MainInstance = this; //set our static reference to our newly initialized instance
+        }
+
+        void OnApplicationQuit()
         {
             RunShutdown();
         }
 
-        //called when an instance awakes in the game
-        void Awake()
+        internal void RunShutdown()
         {
-            instance = this; //set our static reference to our newly initialized instance
-        }
-
-        internal static void RunShutdown() 
-        {
+            Debug.Log("Shutdown = true");
             Shutdown = true;
-            if(SocketServer.Listener != null)
-               SocketServer.Listener.Close();
 
-            if (!SocketServerTask.IsCompleted)
-                SocketServerTask.Wait();
+            SocketServer.ForceShutdown();
 
-            instance.StopAllCoroutines();
+            MainInstance.StopAllCoroutines();
 
-            #if UNITY_EDITOR
-                // Application.Quit() does not work in the editor so
-                // UnityEditor.EditorApplication.isPlaying need to be set to false to end the game
-                UnityEditor.EditorApplication.isPlaying = false;
-            #else
-                Application.Quit();
-            #endif
+#if UNITY_EDITOR
+            // Application.Quit() does not work in the editor so
+            // UnityEditor.EditorApplication.isPlaying need to be set to false to end the game
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
         }
     }
 }

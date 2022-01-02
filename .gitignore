@@ -4,6 +4,12 @@
 [Bb]uild/
 [Bb]uilds/
 Assets/AssetStoreTools*
+Assets/Samples*
+Assets/SteamVR*
+Assets/StreamingAssets*
+Assets/XR*
+Assets/MeshingFeaturePlugin*
+Logs*
 
 # Visual Studio cache directory
 .vs/
@@ -36,3 +42,4 @@ sysinfo.txt
 *.apk
 *.unitypackage
 *.log
+*.meta

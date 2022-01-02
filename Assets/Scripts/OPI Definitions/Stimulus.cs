@@ -6,6 +6,11 @@
     public class Stimulus
     {
         /// <summary>
+        /// The color to use for the stimuli. Default is "White".
+        /// </summary>
+        public Eye Eye { get; set; } = Eye.Left;
+
+        /// <summary>
         /// Coordinate X of the center of stimulus in degrees relative to fixation.
         /// </summary>
         public double X { get; set; }

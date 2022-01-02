@@ -1,6 +1,5 @@
 using Assets.Scripts.OPI_Definitions;
 using System;
-using System.Collections;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
@@ -9,35 +8,18 @@ namespace FieldofVision
 {
     public class MessageProcessing
     {
-        internal static bool Exited = false;
-        internal IEnumerator BeginProcessing()
+        internal bool WaitForResponse = true;
+        private MainExecution Main;
+
+        internal MessageProcessing(MainExecution main) 
         {
-            // handle messages
-            while (!MainExecution.Shutdown)
-            {
-                if (!MainExecution.Messages.IsEmpty)
-                {
-                    Debug.Log("Dequeueing message.");
-                    var success = MainExecution.Messages.TryDequeue(out var msg);
-                    if (success)
-                    {
-                        ProcessMessage(msg);
-                    }
-                    else
-                    {
-                        Debug.LogWarning("Failed to dequeue message.");
-                    }
-                }
-                yield return null; // wait until next frame
-            }
-            Exited = true;
-            Debug.Log("Shutting down Message Processing.");
+            Main = main;
         }
 
-        private void ProcessMessage(string message)
+        internal void ProcessMessage(string message)
         {
             Debug.Log("Processing message: " + message);
-            string[] commands = new string[] { "OPI_CLOSE", "OPI_GET_RES", "OPI_IMAGE", "OPI_PRESENT", "OPI_SET_BGROUND", "OPI_BIN_FIXATION", "OPI_BIN_PRESENT", "OPI_MONO_BG_ADD", "OPI_MONO_SET_BG", "OPI_MONO_PRESENT", "OPI_SET_FOVY" };
+            string[] commands = new string[] { "OPI_CLOSE", "OPI_SET_BGROUND", "OPI_QUERY_DEVICE", "OPI_PRESENT", "OPI_GET_RES", "OPI_SET_FOVY" };
 
             string currentCommand = commands.FirstOrDefault(s => message.Contains(s));
 
@@ -46,6 +28,9 @@ namespace FieldofVision
                 Debug.LogError("OPI command not recognized: " + message);
                 return;
             }
+
+            // Signals SocketServer to wait for OPI_PRESENT coroutine
+            WaitForResponse = currentCommand.Contains("OPI_PRESENT") ? true : false;
 
             // Call method with the same string name as the command
             Type thisType = this.GetType();
@@ -60,25 +45,7 @@ namespace FieldofVision
         private void OPI_CLOSE(string message)
         {
             Debug.Log("OPI_CLOSE");
-            MainExecution.RunShutdown();
-        }
-
-        /// <summary>
-        /// Return the resolution of the VR device.
-        /// </summary>
-        private void OPI_GET_RES(string message)
-        {
-            Debug.Log("OPI_GET_RES");
-        }
-
-        private void OPI_IMAGE(string message)
-        {
-            Debug.Log("OPI_IMAGE");
-        }
-
-        private void OPI_PRESENT(string message)
-        {
-            Debug.Log("OPI_PRESENT");
+            Main.ExecuteOnMainThread.Enqueue(() => { Main.RunShutdown(); });
         }
 
         private void OPI_SET_BGROUND(string message)
@@ -86,28 +53,14 @@ namespace FieldofVision
             Debug.Log("OPI_SET_BGROUND");
         }
 
-        private void OPI_BIN_FIXATION(string message)
+        private void OPI_QUERY_DEVICE(string message)
         {
-            Debug.Log("OPI_BIN_FIXATION");
+            Debug.Log("OPI_QUERY_DEVICE");
         }
 
-        private void OPI_BIN_PRESENT(string message)
+        private void OPI_PRESENT(string message)
         {
-            Debug.Log("OPI_BIN_PRESENT");
-        }
-
-        private void OPI_MONO_BG_ADD(string message)
-        {
-            Debug.Log("OPI_MONO_BG_ADD");
-        }
-
-        private void OPI_MONO_SET_BG(string message)
-        {
-            Debug.Log("OPI_MONO_SET_BG");
-        }
-
-        private void OPI_MONO_PRESENT(string message) 
-        {
+            Debug.Log("OPI_PRESENT");
             Debug.Log("OPI_MONO_PRESENT");
             string[] parameters = message.Split(' ');
             if (parameters.Length < 7)
@@ -125,7 +78,29 @@ namespace FieldofVision
                 ResponseWindow = double.Parse(parameters[6]),
             };
 
-            var response = MainExecution.PresentationControl.Present(stim);
+            if (parameters[1][0] == 'L')
+            {
+                stim.Eye = Eye.Left;
+            }
+            else if (parameters[1][0] == 'R')
+            {
+                stim.Eye = Eye.Right;
+            }
+            else 
+            {
+                stim.Eye = Eye.Both;
+            }
+
+            Main.PresentationControl.Present(stim);
+            // kick off something to wait for present to be done to send the response
+        }
+
+        /// <summary>
+        /// Return the resolution of the VR device.
+        /// </summary>
+        private void OPI_GET_RES(string message)
+        {
+            Debug.Log("OPI_GET_RES");
         }
 
         /// <summary>

@@ -1,3 +1,4 @@
+using Assets.Scripts;
 using Assets.Scripts.OPI_Definitions;
 using System;
 using System.Linq;
@@ -8,13 +9,7 @@ namespace FieldofVision
 {
     public class MessageProcessing
     {
-        internal bool WaitForResponse = true;
-        private MainExecution Main;
-
-        internal MessageProcessing(MainExecution main) 
-        {
-            Main = main;
-        }
+        private MainExecution Main => MainExecution.MainInstance;
 
         internal void ProcessMessage(string message)
         {
@@ -25,12 +20,9 @@ namespace FieldofVision
 
             if (string.IsNullOrEmpty(currentCommand))
             {
-                Debug.LogError("OPI command not recognized: " + message);
+                Main.ErrorOccurred.Invoke("OPI command not recognized: " + message);
                 return;
             }
-
-            // Signals SocketServer to wait for OPI_PRESENT coroutine
-            WaitForResponse = currentCommand.Contains("OPI_PRESENT") ? true : false;
 
             // Call method with the same string name as the command
             Type thisType = this.GetType();
@@ -45,54 +37,47 @@ namespace FieldofVision
         private void OPI_CLOSE(string message)
         {
             Debug.Log("OPI_CLOSE");
-            Main.ExecuteOnMainThread.Enqueue(() => { Main.RunShutdown(); });
+            Main.DoInMainThread(() => { Main.RunShutdown(); });
         }
 
         private void OPI_SET_BGROUND(string message)
         {
             Debug.Log("OPI_SET_BGROUND");
+
+            string[] parameters = message.Trim().Split(' ').Skip(1).ToArray();
+            var success = Conversions.ToColor(parameters, out Color color);
+            if (!success) 
+            {
+                Debug.Log("Parameters for OPI_SET_BGROUND were invalid.");
+                Main.ErrorOccurred.Invoke("Parameters for OPI_SET_BGROUND were invalid.");
+                TCPServer.Write(BitConverter.GetBytes(false));
+                return;
+            }
+
+            Main.DoInMainThread(() => { Main.PresentationControl.SetBackground(color); });
+            TCPServer.Write(BitConverter.GetBytes(true));
         }
 
         private void OPI_QUERY_DEVICE(string message)
         {
             Debug.Log("OPI_QUERY_DEVICE");
+            var connected = TCPServer.Connected();
+            TCPServer.Write(BitConverter.GetBytes(connected));
         }
 
         private void OPI_PRESENT(string message)
         {
             Debug.Log("OPI_PRESENT");
-            Debug.Log("OPI_MONO_PRESENT");
-            string[] parameters = message.Split(' ');
-            if (parameters.Length < 7)
+            string[] parameters = message.Trim().Split(' ').Skip(1).ToArray();
+
+            var success = StaticStimulus.CreateStaticStimulus(parameters, out StaticStimulus stimulus);
+            if (!success)
             {
-                Debug.LogError("Not enough parameters for OPI_MONO_PRESENT.");
+                Main.ErrorOccurred.Invoke("Parameters for OPI_PRESENT were invalid: " + message);
                 return;
             }
 
-            StaticStimulus stim = new StaticStimulus()
-            {
-                X = int.Parse(parameters[2]),
-                Y = int.Parse(parameters[3]),
-                Size = double.Parse(parameters[4]),
-                Duration = double.Parse(parameters[5]),
-                ResponseWindow = double.Parse(parameters[6]),
-            };
-
-            if (parameters[1][0] == 'L')
-            {
-                stim.Eye = Eye.Left;
-            }
-            else if (parameters[1][0] == 'R')
-            {
-                stim.Eye = Eye.Right;
-            }
-            else 
-            {
-                stim.Eye = Eye.Both;
-            }
-
-            Main.PresentationControl.Present(stim);
-            // kick off something to wait for present to be done to send the response
+            Main.PresentationControl.Present(stimulus);
         }
 
         /// <summary>

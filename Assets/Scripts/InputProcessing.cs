@@ -9,13 +9,13 @@ namespace FieldofVision
 
         internal float KeyPressedTime = 0;
 
-        internal MainExecution Main { get; set; }
+        internal bool exited = false;
 
         internal IEnumerator WaitForInput()
         {
-            Debug.Log("Wait for input started.");
+            Debug.Log("Input processing started.");
             // handle messages
-            while (!Main.Shutdown)
+            while (!MainExecution.Shutdown)
             {
                 // Only record input once for each presentation.
                 if (Input.anyKeyDown)

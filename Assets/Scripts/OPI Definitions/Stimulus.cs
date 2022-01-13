@@ -3,32 +3,27 @@
     /// <summary>
     /// Properties shared by all types of stimulus.
     /// </summary>
-    public class Stimulus
+    public abstract class Stimulus
     {
         /// <summary>
-        /// The color to use for the stimuli. Default is "White".
+        /// The eye to present to. Default is "Both".
         /// </summary>
-        public Eye Eye { get; set; } = Eye.Left;
+        public Eye Eye { get; set; } = Eye.Both;
 
         /// <summary>
         /// Coordinate X of the center of stimulus in degrees relative to fixation.
         /// </summary>
-        public double X { get; set; }
+        public float X { get; set; }
 
         /// <summary>
         /// Coordinate Y of the center of stimulus in degrees relative to fixation.
         /// </summary>
-        public double Y { get; set; }
+        public float Y { get; set; }
 
         /// <summary>
-        /// The stimulus level in cd/m^2. 
+        /// The stimulus level as a percentage of opacity (0-100) 
         /// </summary>
-        public double Level { get; set; }
-
-        /// <summary>
-        /// The image to display. Can be null.
-        /// </summary>
-        public string Image { get; set; }
+        public float Level { get; set; }
 
         /// <summary>
         /// The size of stimulus (diameter in degrees), or a scaling factor for <see cref="Image"/>.

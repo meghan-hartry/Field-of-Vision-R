@@ -34,7 +34,7 @@ namespace FieldofVision
 
         internal ViveProEye Device { get; private set; } = new ViveProEye();
 
-        internal MainExecution Main { get; set; }
+        private MainExecution Main => MainExecution.MainInstance;
 
         /// <summary>
         /// Helper method for PresentCoroutine.
@@ -42,11 +42,24 @@ namespace FieldofVision
         /// <inheritdoc cref="Present"/>
         internal void Present(Stimulus stimulus)
         {
-            // Cast to StaticStimulus (can't use pattern matching with Unity).
-            var staticStimulus = stimulus as StaticStimulus;
-            if (staticStimulus == null) { throw new NotImplementedException(); }
-            Debug.Log("Starting presentation.");
-            Main.ExecuteOnMainThread.Enqueue(() => { StartCoroutine(this.PresentCoroutine(staticStimulus)); });
+            try
+            {
+                // Cast to StaticStimulus (can't use pattern matching with Unity).
+                StaticStimulus staticStimulus = stimulus as StaticStimulus;
+                if (staticStimulus == null) { throw new NotImplementedException(); }
+                Debug.Log("Starting presentation.");
+                Main.DoInMainThread(() => { StartCoroutine(this.PresentCoroutine(staticStimulus)); });
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e.Message);
+                Main.ErrorOccurred.Invoke(e.Message);
+            }
+        }
+
+        internal void WaitForResponse(float timeout)
+        {
+            Main.DoInMainThread(() => { StartCoroutine(WaitForResponseCoroutine(timeout)); });
         }
 
         /// <summary>
@@ -57,15 +70,12 @@ namespace FieldofVision
         {
             this.PresentDone = false;
 
-            // Reset keyPressed bool.
-            Main.InputProcessor.KeyPressed = false;
-
             //Debug.Log("Stimuli count: " + this.Tests[this.CurrentTest].Stimuli.Count);
 
             StimulusObj = GameObject.Find("Stimulus");
             if (StimulusObj == null) 
             {
-                Debug.LogError("Could not find Stimulus GameObject.");
+                Main.ErrorOccurred.Invoke("Could not find Stimulus GameObject.");
                 yield break;
             }
 
@@ -75,14 +85,14 @@ namespace FieldofVision
             SetEye(stimulus.Eye);
 
             Debug.Log("Stimulus level: " + stimulus.Level);
-            //this.SetLevel(stimulus.Level);
+            this.SetLevel(stimulus.Level);
             this.SetPosition(stimulus.X, stimulus.Y);
             StimulusObj.GetComponent<Renderer>().enabled = true;
 
             PresentationStartTime = Time.time;
             Debug.Log("Presentation start time: " + PresentationStartTime.ToString());
 
-            //yield for Duration of stimulus presentation. Convert ms to s.
+            // Wait for Duration of stimulus presentation. Convert ms to s.
             yield return new WaitForSeconds((float)stimulus.Duration / 1000);
 
             StimulusObj.GetComponent<Renderer>().enabled = false;
@@ -92,37 +102,81 @@ namespace FieldofVision
 
             if (wait > 0)
             {
-                //yield for Response Window after stimulus presentation.
-                yield return new WaitForSeconds((float)wait);
+                // Wait for Response Window after stimulus presentation.
+                yield return WaitForResponseCoroutine((float)wait);
             }
 
-            var responseTime = (int) ((Main.InputProcessor.KeyPressedTime - PresentationStartTime) * 1000);
-            var response = Main.InputProcessor.KeyPressed? new Response(true, responseTime) : new Response(false);
-
-            this.Responses.Add(response);
-
-            Debug.Log("Responses count: " + this.Responses.Count);
-            Debug.Log("Response: " + this.Responses[this.Responses.Count - 1].Seen);
-            Debug.Log("Response time: " + this.Responses[this.Responses.Count - 1].Time);
-
-            Main.MessageProcessor.WaitForResponse = false;
             this.PresentDone = true;
         }
 
-        private void SetLevel(double cd)
+        private IEnumerator WaitForResponseCoroutine(float timeout)
         {
-            var level = this.Device.ToAlpha(cd);
-            Debug.Log("Stimulus alpha: " + level);
+            // Reset keyPressed bool.
+            Main.InputProcessor.KeyPressed = false;
+
+            var previousCount = Responses.Count;
+            float startTime = Time.time;
+            float elapsed = 0;
+
+            while (!Main.InputProcessor.KeyPressed && elapsed < timeout)
+            {
+                elapsed = Time.time - startTime;
+
+                yield return null;
+            }
+
+            var responseTime = (int)((Main.InputProcessor.KeyPressedTime - PresentationStartTime) * 1000);
+            var response = Main.InputProcessor.KeyPressed ? new Response(true, responseTime) : new Response(false);
+
+            this.Responses.Add(response);
+
+            Debug.Log("Responses count: " + Responses.Count);
+            Debug.Log("Response: " + Responses[^1].Seen);
+            Debug.Log("Response time: " + Responses[^1].Time);
+
+            // Send Response
+            var lastResponse = Main.PresentationControl.Responses[previousCount];
+
+            // Convert the string data to byte data using ASCII encoding.  
+            List<byte> byteList = new List<byte>();
+            byteList.AddRange(BitConverter.GetBytes(lastResponse.Seen));
+            byteList.AddRange(BitConverter.GetBytes(lastResponse.Time));
+
+            var byteData = byteList.ToArray();
+
+            TCPServer.Write(byteData);
+            Debug.Log("Found response.");
+        }
+
+        internal void SetBackground(Color color) 
+        {
+            ActiveCamera = GameObject.Find("Active Camera");
+            ActiveCamera.GetComponent<Camera>().backgroundColor = color;
+        }
+
+        private void SetLevel(float percent)
+        {
+            if (percent > 100) 
+            {
+                Debug.Log("Stimulus level was out of range: " + percent + "%. Reset to 100% (opaque)");
+                percent = 100;
+            }
+            else if (percent < 0)
+            {
+                Debug.Log("Stimulus level was out of range: " + percent + "%. Reset to 0% (transparent)");
+                percent = 0;
+            }
+
+            Debug.Log("Stimulus alpha: " + percent);
             var renderer = StimulusObj.GetComponent<Renderer>();
             var color = renderer.material.color;
-            color.a = (float)level;
+            color.a = percent;
             renderer.material.color = color;
         }
 
-        private void SetPosition(double x, double y)
+        private void SetPosition(float x, float y)
         {
-            var vector = this.Device.ToVector(x, y);
-            this.StimulusObj.transform.position = new Vector3(vector[0], vector[1], 0);
+            this.StimulusObj.transform.position = new Vector3(x, y, 0);
         }
 
         private void SetEye(Eye eye)

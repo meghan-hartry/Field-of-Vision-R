@@ -9,6 +9,11 @@ namespace FieldofVision
     internal class PresentationControl : MonoBehaviour
     {
         /// <summary>
+        /// List of the response received for each stimulus presentation.
+        /// </summary>
+        internal List<Response> Responses = new List<Response>();
+
+        /// <summary>
         /// Stimulus GameObject in Unity.
         /// </summary>
         private GameObject StimulusObj;
@@ -23,32 +28,25 @@ namespace FieldofVision
         /// </summary>
         private GameObject InactiveCamera;
 
-        internal List<Response> Responses = new List<Response>();
-
         /// <summary>
-        /// Status of presentation. Used for flow control.
+        /// Start time of a stimulus presentation.
         /// </summary>
-        internal bool PresentDone = false;
-
-        internal float PresentationStartTime;
-
-        internal ViveProEye Device { get; private set; } = new ViveProEye();
+        private float PresentationStartTime;
 
         private MainExecution Main => MainExecution.MainInstance;
 
         /// <summary>
         /// Helper method for PresentCoroutine.
         /// </summary>
-        /// <inheritdoc cref="Present"/>
         internal void Present(Stimulus stimulus)
         {
             try
             {
-                // Cast to StaticStimulus (can't use pattern matching with Unity).
-                StaticStimulus staticStimulus = stimulus as StaticStimulus;
+                // Cast to StaticStimulus (pattern matching not available in Unity).
+                var staticStimulus = stimulus as StaticStimulus;
                 if (staticStimulus == null) { throw new NotImplementedException(); }
                 Debug.Log("Starting presentation.");
-                Main.DoInMainThread(() => { StartCoroutine(this.PresentCoroutine(staticStimulus)); });
+                Main.DoInMainThread(() => { StartCoroutine(PresentCoroutine(staticStimulus)); });
             }
             catch (Exception e)
             {
@@ -57,9 +55,41 @@ namespace FieldofVision
             }
         }
 
-        internal void WaitForResponse(float timeout)
+        internal void SetBackground(Color color) 
         {
-            Main.DoInMainThread(() => { StartCoroutine(WaitForResponseCoroutine(timeout)); });
+            // Set background color
+            ActiveCamera = GameObject.Find("Active Camera");
+            ActiveCamera.GetComponent<Camera>().backgroundColor = color;
+
+            // todo: set eye
+        }
+
+        internal void SetFixation(FixationPoint fixationPoint)
+        {
+            var fixationObj = GameObject.Find("Fixation");
+            if (fixationObj == null)
+            {
+                Main.ErrorOccurred.Invoke("Could not find Fixation GameObject.");
+                return;
+            }
+
+            // Set position
+            fixationObj.transform.position = new Vector3(fixationPoint.X, fixationPoint.Y, 0);
+
+            // Set size
+            fixationObj.transform.localScale = new Vector3(fixationPoint.SizeX, fixationPoint.SizeY, 1);
+
+            // Set alpha
+            var spriteRenderer = fixationObj.GetComponent<SpriteRenderer>();
+            spriteRenderer.color = fixationPoint.Color;
+
+            // Set color
+            var renderer = fixationObj.GetComponent<Renderer>();
+            var color = renderer.material.color;
+            color.a = fixationPoint.Alpha;
+            renderer.material.color = color;
+
+            //todo: set eye
         }
 
         /// <summary>
@@ -68,25 +98,36 @@ namespace FieldofVision
         /// </summary>
         private IEnumerator PresentCoroutine(StaticStimulus stimulus)
         {
-            this.PresentDone = false;
-
-            //Debug.Log("Stimuli count: " + this.Tests[this.CurrentTest].Stimuli.Count);
-
             StimulusObj = GameObject.Find("Stimulus");
-            if (StimulusObj == null) 
+            if (StimulusObj == null)
             {
                 Main.ErrorOccurred.Invoke("Could not find Stimulus GameObject.");
                 yield break;
             }
 
+            // Set eye
             Debug.Log("Eye: " + stimulus.Eye);
             ActiveCamera = GameObject.Find("Active Camera");
             InactiveCamera = GameObject.Find("Inactive Camera");
             SetEye(stimulus.Eye);
 
+            // Set level
             Debug.Log("Stimulus level: " + stimulus.Level);
-            this.SetLevel(stimulus.Level);
-            this.SetPosition(stimulus.X, stimulus.Y);
+            SetLevel(stimulus.Level);
+
+            // Set position
+            var zPos = StimulusObj.transform.position;
+            StimulusObj.transform.position = new Vector3(stimulus.X, stimulus.Y, zPos.z);
+
+            // Set color
+            var spriteRenderer = StimulusObj.GetComponent<SpriteRenderer>();
+            spriteRenderer.color = stimulus.Color;
+
+            // Set size
+            var zScale = StimulusObj.transform.localScale;
+            StimulusObj.transform.localScale = new Vector3(stimulus.Size, stimulus.Size, zScale.z);
+
+            // Set visible
             StimulusObj.GetComponent<Renderer>().enabled = true;
 
             PresentationStartTime = Time.time;
@@ -95,30 +136,30 @@ namespace FieldofVision
             // Wait for Duration of stimulus presentation. Convert ms to s.
             yield return new WaitForSeconds((float)stimulus.Duration / 1000);
 
+            // Set invisible
             StimulusObj.GetComponent<Renderer>().enabled = false;
 
             // How long to wait in ms after stimulus is presented for a response.
-            var wait = (stimulus.ResponseWindow - stimulus.Duration) / 1000;
+            var wait = stimulus.ResponseWindow - stimulus.Duration;
 
             if (wait > 0)
             {
-                // Wait for Response Window after stimulus presentation.
-                yield return WaitForResponseCoroutine((float)wait);
+                // Wait for Response Window after stimulus presentation in seconds.
+                yield return WaitForResponseCoroutine((float)wait / 1000);
             }
-
-            this.PresentDone = true;
         }
 
-        private IEnumerator WaitForResponseCoroutine(float timeout)
+        private IEnumerator WaitForResponseCoroutine(float timeoutMs)
         {
             // Reset keyPressed bool.
             Main.InputProcessor.KeyPressed = false;
 
+            var timeoutSeconds = (float)timeoutMs / 1000;
             var previousCount = Responses.Count;
             float startTime = Time.time;
             float elapsed = 0;
 
-            while (!Main.InputProcessor.KeyPressed && elapsed < timeout)
+            while (!Main.InputProcessor.KeyPressed && elapsed < timeoutSeconds)
             {
                 elapsed = Time.time - startTime;
 
@@ -128,7 +169,7 @@ namespace FieldofVision
             var responseTime = (int)((Main.InputProcessor.KeyPressedTime - PresentationStartTime) * 1000);
             var response = Main.InputProcessor.KeyPressed ? new Response(true, responseTime) : new Response(false);
 
-            this.Responses.Add(response);
+            Responses.Add(response);
 
             Debug.Log("Responses count: " + Responses.Count);
             Debug.Log("Response: " + Responses[^1].Seen);
@@ -144,14 +185,8 @@ namespace FieldofVision
 
             var byteData = byteList.ToArray();
 
-            TCPServer.Write(byteData);
+            //TCPServer.Write(byteData);
             Debug.Log("Found response.");
-        }
-
-        internal void SetBackground(Color color) 
-        {
-            ActiveCamera = GameObject.Find("Active Camera");
-            ActiveCamera.GetComponent<Camera>().backgroundColor = color;
         }
 
         private void SetLevel(float percent)
@@ -172,11 +207,6 @@ namespace FieldofVision
             var color = renderer.material.color;
             color.a = percent;
             renderer.material.color = color;
-        }
-
-        private void SetPosition(float x, float y)
-        {
-            this.StimulusObj.transform.position = new Vector3(x, y, 0);
         }
 
         private void SetEye(Eye eye)

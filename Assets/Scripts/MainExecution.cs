@@ -22,8 +22,6 @@ namespace FieldofVision
 
         private readonly Queue<Action> ExecuteOnMainThread = new Queue<Action>();
 
-        private Task SocketServerTask;
-
         private static MainExecution instance;
 
         internal static MainExecution MainInstance
@@ -68,7 +66,8 @@ namespace FieldofVision
                 PresentationControl = gameObject.AddComponent<PresentationControl>();
                 InputProcessor = gameObject.AddComponent<InputProcessing>();
 
-                SocketServerTask = Task.Run(TCPServer.StartListening);
+                TCPServer.StartListening();
+
                 StartCoroutine(InputProcessor.WaitForInput());
             }
             catch (Exception e)
@@ -142,7 +141,8 @@ namespace FieldofVision
 
         private IEnumerator OnErrorOccurred(string message)
         {
-            InputProcessor.KeyPressed = false;
+            Debug.Log(message);
+            /*InputProcessor.KeyPressed = false;
 
             Popup = GameObject.Find("Popup");
             if (Popup == null)
@@ -169,7 +169,8 @@ namespace FieldofVision
             yield return WaitForInput();
 
             // hide popup
-            Popup.GetComponent<Canvas>().enabled = false;
+            Popup.GetComponent<Canvas>().enabled = false;*/
+            yield return null;
         }
 
         private IEnumerator WaitForInput() 

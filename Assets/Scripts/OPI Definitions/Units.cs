@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Assets.Scripts.OPI_Definitions
 {
@@ -24,8 +23,8 @@ namespace Assets.Scripts.OPI_Definitions
         /// </summary>
         public Response(bool seen, int time = 0)
         {
-            this.Seen = seen;
-            this.Time = time;
+            Seen = seen;
+            Time = time;
         }
 
         /// <summary>
@@ -79,57 +78,50 @@ namespace Assets.Scripts.OPI_Definitions
         }
 
         /// <summary>
-        /// Try to parse a string value into a color value.
+        /// Try to parse a string color name or numeric RGB values into a color value.
+        /// RGB values override a string color name.
+        ///  parameter 0:   color (string color name)
+        ///  parameter 1:   color (numeric RGB red value)
+        ///  parameter 2:   color (numeric RGB green value)
+        ///  parameter 3:   color (numeric RGB blue value)
         /// </summary>
-        /// <param name="value">Name of a color</param>
-        /// <param name="color">Color result</param>
-        /// <returns>Success</returns>
-        public static bool ToColor(string value, out Color color) => ToColor(new[] { value }, out color);
-
-        /// <summary>
-        /// Try to parse a string array into a color value.
-        /// </summary>
-        /// <param name="value">String aray with name of a color or RBG triplet</param>
+        /// <param name="value">String array of length 4 with string color name (index 0) or numeric RGB values (indices 1-3)</param>
         /// <param name="color">Color result</param>
         /// <returns>Success</returns>
         public static bool ToColor(string[] value, out Color color)
         {
-            if (value.Length == 1)
-            {
-                try
-                {
-                    color = (Color)typeof(Color).GetProperty(value[0].ToLowerInvariant()).GetValue(null, null);
-                    return true;
-                }
-                catch
-                {
-                    color = Color.white;
-                    return false;
-                }
-            }
-            else if (value.Length == 3)
-            {
-                var redSuccess = RGBToColorValue(value[0], out float red);
-                var greenSuccess = RGBToColorValue(value[1], out float green);
-                var blueSuccess = RGBToColorValue(value[2], out float blue);
-                var success = redSuccess && greenSuccess && blueSuccess;
+            color = Color.black; // default value
 
-                if (success)
-                {
-                    color = new Color(red, green, blue);
-                    return true;
-                }
+            if (value.Length != 4)
+            {
+                Debug.Log("Not the correct number of parameters to parse a color value.");
+                return false;
             }
 
-            color = Color.white;
-            return false;
+            // Try to parse an RGB value
+            if (RGBToColorValue(value[1], out float red) && RGBToColorValue(value[2], out float green) && RGBToColorValue(value[3], out float blue))
+            {
+                color = new Color(red, green, blue);
+                return true;
+            }
+
+            // If parsing an RGB value was unsuccessful, try to parse a string color name (Enum.TryParse is not available in Unity).
+            try
+            {
+                color = (Color)typeof(Color).GetProperty(value[0].ToLowerInvariant()).GetValue(null, null);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         /// <summary>
-        /// Try to convert an RBG value (0-255), to its UnityEngine.Color value (0-1) equivalent.
+        /// Try to convert an RGB value (0-255), to its UnityEngine.Color value (0-1) equivalent.
         /// Override method that converts a string value to a float.
         /// </summary>
-        /// <param name="value">RBG value to be converted</param>
+        /// <param name="value">RGB value to be converted</param>
         /// <param name="colorValue">Color value result</param>
         /// <returns>Success</returns>
         private static bool RGBToColorValue(string value, out float percent) 
@@ -144,9 +136,9 @@ namespace Assets.Scripts.OPI_Definitions
         }
 
         /// <summary>
-        /// Try to convert an RBG value (0-255), to its UnityEngine.Color value (0-1) equivalent.
+        /// Try to convert an RGB value (0-255), to its UnityEngine.Color value (0-1) equivalent.
         /// </summary>
-        /// <param name="value">RBG value to be converted</param>
+        /// <param name="value">RGB value to be converted</param>
         /// <param name="colorValue">Color value result</param>
         /// <returns>Success</returns>
         private static bool RGBToColorValue(ref float colorValue)

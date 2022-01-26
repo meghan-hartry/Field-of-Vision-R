@@ -1,4 +1,6 @@
-﻿namespace Assets.Scripts.OPI_Definitions
+﻿using UnityEngine;
+
+namespace Assets.Scripts.OPI_Definitions
 {
     /// <summary>
     /// Properties shared by all types of stimulus.
@@ -28,11 +30,11 @@
         /// <summary>
         /// The size of stimulus (diameter in degrees), or a scaling factor for <see cref="Image"/>.
         /// </summary>
-        public double Size { get; set; }
+        public float Size { get; set; }
 
         /// <summary>
-        /// The color to use for the stimuli. Default is "White".
+        /// The color to use for the stimuli. Default is black.
         /// </summary>
-        public string Color { get; set; } = "White";
+        public Color Color { get; set; } = Color.black;
     }
 }

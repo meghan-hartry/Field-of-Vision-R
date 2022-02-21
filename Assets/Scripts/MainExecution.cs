@@ -1,9 +1,9 @@
 using UnityEngine;
 using System;
-using System.Threading.Tasks;
 using System.Collections.Generic;
 using Assets.Scripts;
 using System.Collections;
+using System.Threading;
 
 namespace FieldofVision
 {
@@ -16,6 +16,8 @@ namespace FieldofVision
 
         internal InputProcessing InputProcessor { get; private set; }
 
+        internal TCPServer Server { get; private set; }
+
         internal MessageProcessing MessageProcessor = new MessageProcessing();
 
         internal static bool Shutdown { get; set; } = false;
@@ -23,6 +25,8 @@ namespace FieldofVision
         private readonly Queue<Action> ExecuteOnMainThread = new Queue<Action>();
 
         private static MainExecution instance;
+
+        internal int ActionsExecuting = 0;
 
         internal static MainExecution MainInstance
         {
@@ -66,7 +70,9 @@ namespace FieldofVision
                 PresentationControl = gameObject.AddComponent<PresentationControl>();
                 InputProcessor = gameObject.AddComponent<InputProcessing>();
 
-                TCPServer.StartListening();
+                Server = new TCPServer();
+                Server.StartListening();
+                Server.StartReading();
 
                 StartCoroutine(InputProcessor.WaitForInput());
             }
@@ -84,8 +90,9 @@ namespace FieldofVision
         {
             lock (ExecuteOnMainThread) 
             {
-                while (ExecuteOnMainThread.Count > 0)
+                while (ExecuteOnMainThread.Count > 0 && ActionsExecuting < 1)
                 {
+                    Interlocked.Increment(ref ActionsExecuting);
                     var action = ExecuteOnMainThread.Dequeue();
                     action?.Invoke();
                 }
@@ -123,7 +130,7 @@ namespace FieldofVision
             Debug.Log("Shutting down...");
             Shutdown = true;
 
-            TCPServer.Disconnect();
+            Server.StopListening();
 
 #if UNITY_EDITOR
             // Application.Quit() does not work in the editor so

@@ -59,7 +59,6 @@ namespace Assets.Scripts.OPI_Definitions
 
             success &= float.TryParse(parameters[4], out float size);
             if (!success) errorMessage += "Parameter for OPI_PRESENT Size: " + parameters[4] + " was invalid.\n";
-            size /= 10f;
 
             success &= int.TryParse(parameters[5], out int duration);
             if (!success) errorMessage += "Parameter for OPI_PRESENT Duration: " + parameters[5] + " was invalid.\n";

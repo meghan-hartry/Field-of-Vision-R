@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 namespace FieldofVision
@@ -53,43 +54,57 @@ namespace FieldofVision
                 Debug.LogError(e.Message);
                 Main.ErrorOccurred.Invoke(e.Message);
             }
-        }
-
-        internal void SetBackground(Color color) 
-        {
-            // Set background color
-            ActiveCamera = GameObject.Find("Active Camera");
-            ActiveCamera.GetComponent<Camera>().backgroundColor = color;
-
-            // todo: set eye
-        }
-
-        internal void SetFixation(FixationPoint fixationPoint)
-        {
-            var fixationObj = GameObject.Find("Fixation");
-            if (fixationObj == null)
+            finally 
             {
-                Main.ErrorOccurred.Invoke("Could not find Fixation GameObject.");
-                return;
+                Interlocked.Decrement(ref Main.ActionsExecuting);
             }
+        }
 
-            // Set position
-            fixationObj.transform.position = new Vector3(fixationPoint.X, fixationPoint.Y, 0);
+        internal void SetBackground(Color color, FixationPoint fixationPoint, Eye eye) 
+        {
+            try
+            {
+                // Set background color
+                ActiveCamera = GameObject.Find("Active Camera");
+                ActiveCamera.GetComponent<Camera>().backgroundColor = color;
 
-            // Set size
-            fixationObj.transform.localScale = new Vector3(fixationPoint.SizeX, fixationPoint.SizeY, 1);
+                var fixationObj = GameObject.Find("Fixation");
+                if (fixationObj == null)
+                {
+                    Main.ErrorOccurred.Invoke("Could not find Fixation GameObject.");
+                    return;
+                }
 
-            // Set alpha
-            var spriteRenderer = fixationObj.GetComponent<SpriteRenderer>();
-            spriteRenderer.color = fixationPoint.Color;
+                // Set fixation position
+                var zPos = fixationObj.transform.localPosition.z;
+                fixationObj.transform.localPosition = new Vector3(fixationPoint.X, fixationPoint.Y, zPos);
 
-            // Set color
-            var renderer = fixationObj.GetComponent<Renderer>();
-            var color = renderer.material.color;
-            color.a = fixationPoint.Alpha;
-            renderer.material.color = color;
+                // Set fixation size
+                var zScale = fixationObj.transform.localScale.z;
+                fixationObj.transform.localScale = new Vector3(fixationPoint.SizeX, fixationPoint.SizeY, zScale);
 
-            //todo: set eye
+                // Set fixation alpha
+                var renderer = fixationObj.GetComponent<Renderer>();
+                var fixationColor = renderer.material.color;
+                color.a = fixationPoint.Alpha;
+                renderer.material.color = fixationColor;
+
+                // Set fixation color
+                var spriteRenderer = fixationObj.GetComponent<SpriteRenderer>();
+                spriteRenderer.color = fixationPoint.Color;
+
+                // Set eye
+                SetEye(eye);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e.Message);
+                Main.ErrorOccurred.Invoke(e.Message);
+            }
+            finally
+            {
+                Interlocked.Decrement(ref Main.ActionsExecuting);
+            }
         }
 
         /// <summary>
@@ -105,27 +120,31 @@ namespace FieldofVision
                 yield break;
             }
 
+            var fixationObj = GameObject.Find("Fixation");
+            if (fixationObj == null)
+            {
+                Main.ErrorOccurred.Invoke("Could not find Fixation GameObject.");
+                yield break;
+            }
+
             // Set eye
-            Debug.Log("Eye: " + stimulus.Eye);
-            ActiveCamera = GameObject.Find("Active Camera");
-            InactiveCamera = GameObject.Find("Inactive Camera");
             SetEye(stimulus.Eye);
 
             // Set level
             Debug.Log("Stimulus level: " + stimulus.Level);
             SetLevel(stimulus.Level);
 
-            // Set position
-            var zPos = StimulusObj.transform.position;
-            StimulusObj.transform.position = new Vector3(stimulus.X, stimulus.Y, zPos.z);
+            // Set position.
+            var zPos = StimulusObj.transform.localPosition.z;
+            StimulusObj.transform.localPosition = new Vector3(stimulus.X, stimulus.Y, zPos);
 
             // Set color
             var spriteRenderer = StimulusObj.GetComponent<SpriteRenderer>();
             spriteRenderer.color = stimulus.Color;
 
             // Set size
-            var zScale = StimulusObj.transform.localScale;
-            StimulusObj.transform.localScale = new Vector3(stimulus.Size, stimulus.Size, zScale.z);
+            var zScale = StimulusObj.transform.localScale.z;
+            StimulusObj.transform.localScale = new Vector3(stimulus.Size, stimulus.Size, zScale);
 
             // Set visible
             StimulusObj.GetComponent<Renderer>().enabled = true;
@@ -147,6 +166,7 @@ namespace FieldofVision
                 // Wait for Response Window after stimulus presentation in seconds.
                 yield return WaitForResponseCoroutine((float)wait / 1000);
             }
+            Debug.Log("Presentation completed.");
         }
 
         private IEnumerator WaitForResponseCoroutine(float timeoutMs)
@@ -185,7 +205,7 @@ namespace FieldofVision
 
             var byteData = byteList.ToArray();
 
-            //TCPServer.Write(byteData);
+            Main.Server.Write(byteData);
             Debug.Log("Found response.");
         }
 
@@ -211,6 +231,9 @@ namespace FieldofVision
 
         private void SetEye(Eye eye)
         {
+            Debug.Log("Eye: " + eye);
+            ActiveCamera = GameObject.Find("Active Camera");
+            InactiveCamera = GameObject.Find("Inactive Camera");
             switch (eye) 
             {
                 case Eye.Left:

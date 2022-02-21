@@ -8,215 +8,237 @@ using UnityEngine;
 
 namespace FieldofVision
 {
-    internal static class TCPServer
+    public class TCPServer
     {
-        private static readonly IPAddress IP = IPAddress.Parse("127.0.0.1");
+        private readonly IPAddress IP = IPAddress.Parse("127.0.0.1");
         private const int PORT = 50008;
         private const int BufferSize = 1024;
+        private bool Reading = false;
+        private object _lock = new object(); // sync lock 
+        private CancellationTokenSource CancelListener = null;
+        private CancellationTokenSource CancelReading = null;
+        private TcpClient CurrentClient = null;
 
-        private static object _lock = new object(); // sync lock 
-        private static Task CurrentClientTask = null;
-        private static TcpClient CurrentClient = null;
-        private static CancellationTokenSource CancelListener = new CancellationTokenSource();
-        private static bool CancelReader = false;
-        internal static Task SocketServerTask;
+        // todo: should only make status public
+        public Task ListeningTask; 
+        public Task ReadingTask;
+
+        // only getter public
+        public StringBuilder Buffer = new StringBuilder();
 
         // The core server task
-        internal static void StartListening()
+        public void StartListening()
         {
-            SocketServerTask = Task.Run(async () =>
-            {
-                Debug.Log("Opening server on " + IP.ToString() + ", Port: " + PORT);
-                var tcpListener = new TcpListener(IP, PORT);
-                tcpListener.Start();
-                TcpClient tcpClient = null;
+            CancelListener = new CancellationTokenSource();
+            Debug.Log("Opening server on " + IP.ToString() + ", Port: " + PORT);
+            var tcpListener = new TcpListener(IP, PORT);
+            tcpListener.Start();
+            TcpClient tcpClient = null;
 
-                while (!MainExecution.Shutdown)
+            ListeningTask = Task.Run(async () =>
+            {
+                while (!CancelListener.IsCancellationRequested)
                 {
+                    // This uses the asynchronous method AcceptTcpClientAsync, but then blocks using await. This is not a mistake, the synchronous AcceptTcpClient method is buggy
+                    // and proper cancellation is impossible. Using the Async task allows the CancellationToken to cleanly end listening.
+                    // Don't change this. I've spend dozens of hours on this single issue.
                     tcpClient = await Task.Run(() => tcpListener.AcceptTcpClientAsync(), CancelListener.Token);
-                    if (Connected(tcpClient))
+
+                    // Close existing connections
+                    Disconnect();
+
+                    lock (_lock)
                     {
+                        CurrentClient = tcpClient;
+
+                        // This discards any pending data and Winsock resets the connection.
+                        CurrentClient.LingerState = new LingerOption(enable: true, seconds: 0);
+
                         Debug.Log("Client connected.");
-                        var task = StartClientTaskAsync(tcpClient);
                     }
                 }
 
                 tcpListener.Stop();
-                Debug.Log("We exited!!");
+                Debug.Log("Server stopped listening.");
             });
         }
 
-        // Register and handle the connection
-        private static async Task StartClientTaskAsync(TcpClient tcpClient)
+        public Task StopListening() 
         {
-            if (MainExecution.Shutdown) return;
-
-            // Start the new reading task
-            var clientTask = ReadingAsync(tcpClient);
-
-            // Shutdown any previous connections
+            Debug.Log("Cancelling listener.");
             Disconnect();
-            CancelReader = false;
+            CancelListener.Cancel();
 
-            // Save the new Client and its Task.
-            lock (_lock) 
+            // Check if the ListeningTask is stuck waiting for a new connection
+            if (ListeningTask.Status == TaskStatus.WaitingForActivation)
             {
-                CurrentClient = tcpClient;
-                CurrentClientTask = clientTask;
-            }
-
-            // Catch all errors of ReadingAsync
-            try
-            {
-                await CurrentClientTask;
-                // we may be on another thread after "await"
-            }
-            catch (Exception ex)
-            {
-                // log the error
-                Debug.LogError(ex.ToString());
-            }
-        }
-
-        // Handle new connection
-        private static async Task ReadingAsync(TcpClient tcpClient)
-        {
-            if (MainExecution.Shutdown) return;
-            await Task.Yield();
-            // continue asynchronously on another threads
-
-            Debug.Log("ReadingAsync started.");
-
-            var buffer = new byte[BufferSize];
-            var stringBuffer = new StringBuilder();
-            //NetworkStream networkStream = null;
-
-            while (Connected(tcpClient))
-            {
-                int byteCount = 0;
                 try
                 {
-                    lock (_lock)
-                    {
-                        NetworkStream networkStream = tcpClient.GetStream();
-                        if(networkStream.DataAvailable && !CancelReader)
-                            byteCount = networkStream.Read(buffer, 0, buffer.Length);
-                    }
+                    Debug.Log("Connecting socket to force close listener.");
+                    // connect a socket so it can exit
+                    IPEndPoint ipe = new IPEndPoint(IP, PORT);
+                    using var socket = new Socket(ipe.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                    socket.Connect(ipe);
+                    socket.LingerState = new LingerOption(enable: true, seconds: 0);
+                    socket.Close();
+                    socket.Dispose();
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                    // Socket was closed while we were trying to read.
-                    break;
-                }
-
-                if (byteCount > 0)
-                {
-                    var msg = Encoding.ASCII.GetString(buffer, 0, byteCount);
-                    stringBuffer.Append(msg); // store
-
-                    Debug.Log(string.Format("Read {0} bytes from socket. \n Data : {1}",
-                            msg.Length, msg));
-
-                    // Add message to processing queue.
-                    Debug.Log("Enqueueing message.");
-                    MainExecution.MainInstance.MessageProcessor.ProcessMessage(msg);
+                    // Socket may throw if cancellation succeeds.
+                    Debug.Log("Error: " + e.Message);
                 }
             }
 
-            /*if(networkStream != null)
-                networkStream.Close();*/
-            Debug.Log("ReadingAsync ended.");
+            return Task.Run(() => 
+            {
+                // Wait for Task to finish, with 5 second timeout.
+                ListeningTask.Wait(5);
+                if (!ListeningTask.IsCompleted) 
+                {
+                    throw new Exception("Could not cancel listener.");
+                }
+            });
         }
 
-        internal static void Write(byte[] data)
+        public void WaitForClientConnection() 
         {
-            try
+            // Wait for Task to finish, with 5 second timeout.
+            bool success = SpinWait.SpinUntil(() => CurrentClient != null, TimeSpan.FromSeconds(5));
+            if (!success)
             {
+                throw new Exception("No client found.");
+            }
+        }
+
+        // Register and handle the connection
+        public void StartReading()
+        {
+            Debug.Log("Started reading.");
+            CancelReading = new CancellationTokenSource();
+            var byteBuffer = new byte[BufferSize];
+
+            ReadingTask = Task.Run(() =>
+            {
+                Reading = true;
+                while (!CancelReading.IsCancellationRequested)
+                {
+                    int byteCount = 0;
+                    try
+                    {
+                        lock (_lock)
+                        {
+                            NetworkStream networkStream = CurrentClient.GetStream();
+                            if (networkStream.DataAvailable)
+                            {
+                                byteCount = networkStream.Read(byteBuffer, 0, byteBuffer.Length);
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        // Socket was closed while we were trying to read.
+                        Debug.Log("Error: " + e.Message);
+                    }
+
+                    if (byteCount > 0)
+                    {
+                        var msg = Encoding.ASCII.GetString(byteBuffer, 0, byteCount);
+                        Buffer.Append(msg); // store
+
+                        Debug.Log(string.Format("Read {0} bytes from socket. \n Data : {1}", msg.Length, msg));
+
+                        // Add message to processing queue.
+                        Debug.Log("Enqueueing message.");
+                        //MainExecution.MainInstance.MessageProcessor.ProcessMessage(msg);
+                    }
+                    Thread.Sleep(100);
+                }
+
+                //tcpListener.Stop();
+                Debug.Log("Server stopped reading.");
+                Reading = false;
+            }, CancelReading.Token);
+
+        }
+
+        public void StopReading()
+        {
+            Debug.Log("Cancelling reading.");
+            CancelReading.Cancel();
+
+            Task.Run(() =>
+            {
+                if (ReadingTask != null) 
+                {
+                    // Wait for Task to finish, with 5 second timeout.
+                    ReadingTask.Wait(5);
+                    Thread.Sleep(200); // give it time to cleanup
+                    if (!ReadingTask.IsCompleted && Reading == true)
+                    {
+                        throw new Exception("Could not cancel reading.");
+                    }
+                }
+            }).Wait();
+        }
+
+        public Task Write(byte[] data)
+        {
+            return Task.Run(() =>
+            {
+                WaitForClientConnection();
                 lock (_lock)
                 {
-                    NetworkStream networkStream = CurrentClient.GetStream();
+                    using NetworkStream networkStream = CurrentClient.GetStream();
                     networkStream.Write(data, 0, data.Length);
                     Debug.Log("[Server] Response has been written");
                 }
-            }
-            catch (System.IO.IOException)
-            {
-                // Socket was closed while we were trying to write.
-                throw;
-            }
+
+                return Task.CompletedTask;
+            });
         }
 
-        // Check if client is still connected
-        private static bool Connected(TcpClient tcpClient)
+        public void Disconnect()
         {
-            try
+            lock (_lock) 
             {
-                lock (_lock)
+                if (Reading == true)
                 {
-                    if (tcpClient != null && tcpClient.Client != null && tcpClient.Client.Connected
-                    && !MainExecution.Shutdown)
-                    {
-                        /* pear to the documentation on Poll:
-                        * When passing SelectMode.SelectRead as a parameter to the Poll method it will return 
-                        * -either- true if Socket.Listen(Int32) has been called and a connection is pending;
-                        * -or- true if data is available for reading; 
-                        * -or- true if the connection has been closed, reset, or terminated; 
-                        * otherwise, returns false
-                        */
-
-                        byte[] buff = new byte[1];
-
-                        // Detect if client connected, Poll returns false or data is available
-                        if (!tcpClient.Client.Poll(0, SelectMode.SelectRead))
-                        {
-                            return true;
-                        }
-
-                        // Check if data is available, otherwise this is a bad connection
-                        tcpClient.ReceiveTimeout = 1000; // set 1s Receive timeout.
-                        if (tcpClient.Client.Receive(buff, SocketFlags.Peek) != 0)
-                        {
-                            return true;
-                        }
-                    }
-
-                    Debug.Log("Bad connection.");
-                    return false;
+                    StopReading();
                 }
-            }
-            catch(Exception e)
-            {
-                Debug.LogError(e.ToString());
-                return false;
-            }
-        }
-
-        internal static void Disconnect()
-        {
-            lock (_lock)
-            {
                 if (CurrentClient != null)
                 {
-                    CancelReader = true;
+                    Debug.Log("Closing Client.");
                     CurrentClient.Close();
+                    CurrentClient.Dispose();
                 }
-
-                if (CurrentClientTask != null)
-                {
-                    var wait = 0;
-                    while (!CurrentClientTask.IsCompleted && wait < 1000)
-                    {
-                        wait += 200;
-                        Thread.Sleep(200);
-                    }
-                    if (wait > 1000) 
-                        throw new Exception("Could not complete task.");
-                    CurrentClientTask = null;
-                }
-
-                if (MainExecution.Shutdown)
-                    CancelListener.Cancel();
             }
+        }
+
+        public static bool IsConnected(Socket socket) 
+        {
+            // The socket is not null and thinks it's connected
+            if (socket != null && socket.Connected)
+            {
+                byte[] buff = new byte[1];
+
+                // The socket is CONNECTED when Poll is FALSE.
+                if (!socket.Poll(0, SelectMode.SelectRead))
+                {
+                    return true;
+                }
+
+                // The socket is CONNECTED if data is available when Poll is TRUE.
+                var timeoutSetting = socket.ReceiveTimeout; // save timeout setting
+                socket.ReceiveTimeout = 200; // temporarily set 200ms receive timeout.
+                if (socket.Receive(buff, SocketFlags.Peek) != 0)
+                {
+                    return true;
+                }
+                socket.ReceiveTimeout = timeoutSetting; // reset timeout setting
+
+            }
+            return false;
         }
     }
 }

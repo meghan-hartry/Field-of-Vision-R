@@ -64,25 +64,25 @@ namespace Assets.Scripts.OPI_Definitions
             var success = float.TryParse(parameters[1], out float x);
             if (!success) errorMessage += "Parameter for OPI_SET_BGROUND Fixation X: " + parameters[0] + " was invalid.\n";
 
-            success &= float.TryParse(parameters[2], out float y);
+            success = float.TryParse(parameters[2], out float y);
             if (!success) errorMessage += "Parameter for OPI_SET_BGROUND Fixation Y: " + parameters[1] + " was invalid.\n";
 
-            success &= float.TryParse(parameters[3], out float sizeX);
+            success = float.TryParse(parameters[3], out float sizeX);
             if (!success) errorMessage += "Parameter for OPI_SET_BGROUND Fixation Horizontal Size: " + parameters[2] + " was invalid.\n";
 
-            success &= float.TryParse(parameters[4], out float sizeY);
+            success = float.TryParse(parameters[4], out float sizeY);
             if (!success) errorMessage += "Parameter for OPI_SET_BGROUND Fixation Veritical Size: " + parameters[3] + " was invalid.\n";
 
             string[] colorParameters = new string[4];
             Array.Copy(parameters, 6, colorParameters, 0, 4);
-            success &= Conversions.ToColor(colorParameters, out Color color);
+            success = Conversions.ToColor(colorParameters, out Color color);
             if (!success) errorMessage += "Parameters for OPI_SET_BGROUND Fixation Color: " + string.Join(' ', colorParameters) + " were invalid.\n";
 
-            success &= Conversions.ToAlpha(parameters[5], out float alpha);
+            success = Conversions.ToAlpha(parameters[5], out float alpha);
             if (!success) errorMessage += "Parameter for OPI_SET_BGROUND Fixation Alpha: " + parameters[6] + " was invalid.\n";
             color.a = alpha;
 
-            if (success)
+            if (errorMessage == string.Empty)
             {
                 fixationPoint = new FixationPoint()
                 {

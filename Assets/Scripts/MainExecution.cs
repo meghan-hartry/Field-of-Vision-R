@@ -1,58 +1,45 @@
 using UnityEngine;
 using System;
-using System.Collections.Generic;
-using Assets.Scripts;
-using System.Collections;
 using System.Threading;
+using System.Collections.Concurrent;
 
 namespace FieldofVision
 {
     /// <summary>
-    /// This class defines the OPI implementation on Unity engine.
+    /// This class control the main execution of the OPI implementation on Unity engine.
     /// </summary>
     public class MainExecution : MonoBehaviour
-    {        
-        internal PresentationControl PresentationControl { get; private set; }
+    {
+        #region Properties and Fields
 
-        internal InputProcessing InputProcessor { get; private set; }
+        /// <summary>
+        /// Reference to the class that controls screen drawing.
+        /// </summary>
+        internal ScreenDrawing Draw { get; private set; }
 
+        /// <summary>
+        /// Reference to the TCP Server class.
+        /// </summary>
         internal TCPServer Server { get; private set; }
-
-        internal MessageProcessing MessageProcessor = new MessageProcessing();
-
-        internal static bool Shutdown { get; set; } = false;
-
-        private readonly Queue<Action> ExecuteOnMainThread = new Queue<Action>();
-
-        private static MainExecution instance;
-
-        internal int ActionsExecuting = 0;
 
         internal static MainExecution MainInstance
         {
             get
             {
-                if (instance) return instance;
-
-                instance = FindObjectOfType<MainExecution>();
-
-                if (instance) return instance;
-
-                return instance = new GameObject(nameof(MainExecution)).AddComponent<MainExecution>();
+                if (Instance) return Instance;
+                Instance = FindObjectOfType<MainExecution>();
+                if (Instance) return Instance;
+                return Instance = new GameObject(nameof(MainExecution)).AddComponent<MainExecution>();
             }
         }
 
-        public ErrorOccurredEvent ErrorOccurred;
+        private readonly ConcurrentQueue<Action> ExecuteOnMainThread = new ConcurrentQueue<Action>();
+        private static MainExecution Instance;
+        private int ActionsExecuting = 0;
 
-        /// <summary>
-        /// Popup GameObject in Unity.
-        /// </summary>
-        private GameObject Popup;
+        #endregion
 
-        /// <summary>
-        /// PopupMessage GameObject in Unity.
-        /// </summary>
-        private GameObject PopupMessage;
+        #region MonoBehaviour Override Methods
 
         /// <summary>
         /// Start is called before the first frame update.
@@ -64,22 +51,19 @@ namespace FieldofVision
             {
                 Application.runInBackground = true;
 
-                ErrorOccurred = new ErrorOccurredEvent();
-                ErrorOccurred.AddListener(OnErrorOccurredHelper);
+                // Create screen drawing class.
+                Draw = gameObject.AddComponent<ScreenDrawing>();
 
-                PresentationControl = gameObject.AddComponent<PresentationControl>();
-                InputProcessor = gameObject.AddComponent<InputProcessing>();
+                // Start Input Processing
+                gameObject.AddComponent<InputProcessing>();
 
+                // Create server and start listening for client connections.
                 Server = new TCPServer();
                 Server.StartListening();
-                Server.StartReading();
-
-                StartCoroutine(InputProcessor.WaitForInput());
             }
             catch (Exception e)
             {
                 Debug.LogError(e.Message);
-                ErrorOccurred.Invoke(e.Message);
             }
         }
 
@@ -93,44 +77,39 @@ namespace FieldofVision
                 while (ExecuteOnMainThread.Count > 0 && ActionsExecuting < 1)
                 {
                     Interlocked.Increment(ref ActionsExecuting);
-                    var action = ExecuteOnMainThread.Dequeue();
+                    ExecuteOnMainThread.TryDequeue(out var action);
                     action?.Invoke();
                 }
             }
         }
 
-        //called when an instance awakes in the game
+        /// <summary>
+        /// Called when an instance awakes in the game
+        /// </summary>
         void Awake()
         {
-            if (instance && instance != this)
+            if (Instance && Instance != this)
             {
                 Destroy(gameObject);
                 return;
             }
 
-            instance = this; //set our static reference to our newly initialized instance
+            Instance = this; //set our static reference to our newly initialized instance
             DontDestroyOnLoad(gameObject);
         }
 
         void OnApplicationQuit()
         {
-            RunShutdown();
+            Shutdown();
         }
 
-        internal void DoInMainThread(Action action)
-        {
-            lock (ExecuteOnMainThread)
-            {
-                ExecuteOnMainThread.Enqueue(action);
-            }
-        }
+        #endregion
 
-        internal void RunShutdown()
-        {
-            Debug.Log("Shutting down...");
-            Shutdown = true;
+        #region Internal Methods
 
-            Server.StopListening();
+        internal void Shutdown()
+        {
+            Server.Shutdown();
 
 #if UNITY_EDITOR
             // Application.Quit() does not work in the editor so
@@ -141,64 +120,19 @@ namespace FieldofVision
 #endif
         }
 
-        private void OnErrorOccurredHelper(string message)
+        internal void DoInMainThread(Action action)
         {
-            ExecuteOnMainThread.Enqueue(() => { StartCoroutine(OnErrorOccurred(message)); });
-        }
-
-        private IEnumerator OnErrorOccurred(string message)
-        {
-            Debug.Log(message);
-            /*InputProcessor.KeyPressed = false;
-
-            Popup = GameObject.Find("Popup");
-            if (Popup == null)
+            lock (ExecuteOnMainThread)
             {
-                ErrorOccurred.Invoke("Could not find Popup GameObject.");
-                yield break; 
-            }
-
-            PopupMessage = GameObject.Find("Message");
-            if (PopupMessage == null)
-            {
-                ErrorOccurred.Invoke("Could not find PopupMessage GameObject.");
-                yield break;
-            }
-
-            // Update message
-            PopupMessage.GetComponent<UnityEngine.UI.Text>().text = message + " Press any key to continue.";
-
-            // show popup
-            Popup.GetComponent<Canvas>().enabled = true;
-
-            Debug.Log("Unity Event called with argument: " + message);
-
-            yield return WaitForInput();
-
-            // hide popup
-            Popup.GetComponent<Canvas>().enabled = false;*/
-            yield return null;
-        }
-
-        private IEnumerator WaitForInput() 
-        {
-            while (!InputProcessor.KeyPressed)
-            {
-                yield return null;
+                ExecuteOnMainThread.Enqueue(action);
             }
         }
 
-        private IEnumerator WaitForInputWithTimeout(float timeout)
+        internal void DecrementActionsExecuting()
         {
-            float startTime = Time.time;
-            float elapsed = 0;
-
-            while (!InputProcessor.KeyPressed && elapsed < timeout)
-            {
-                elapsed = Time.time - startTime;
-
-                yield return null;
-            }
+            Interlocked.Decrement(ref ActionsExecuting);
         }
+
+        #endregion
     }
 }

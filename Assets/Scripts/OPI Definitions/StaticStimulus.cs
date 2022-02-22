@@ -48,30 +48,30 @@ namespace Assets.Scripts.OPI_Definitions
             var success = Conversions.ToEye(parameters[0], out Eye eye);
             if (!success) errorMessage += "Parameter for OPI_PRESENT Eye: " + parameters[0] + " was invalid.\n";
 
-            success &= float.TryParse(parameters[1], out float x);
+            success = float.TryParse(parameters[1], out float x);
             if (!success) errorMessage += "Parameter for OPI_PRESENT X: " + parameters[1] + " was invalid.\n";
 
-            success &= float.TryParse(parameters[2], out float y);
+            success = float.TryParse(parameters[2], out float y);
             if (!success) errorMessage += "Parameter for OPI_PRESENT Y: " + parameters[2] + " was invalid.\n";
 
-            success &= Conversions.ToAlpha(parameters[3], out float alpha);
+            success = Conversions.ToAlpha(parameters[3], out float alpha);
             if (!success) errorMessage += "Parameter for OPI_PRESENT Level: " + parameters[3] + " was invalid.\n";
 
-            success &= float.TryParse(parameters[4], out float size);
+            success = float.TryParse(parameters[4], out float size);
             if (!success) errorMessage += "Parameter for OPI_PRESENT Size: " + parameters[4] + " was invalid.\n";
 
-            success &= int.TryParse(parameters[5], out int duration);
+            success = int.TryParse(parameters[5], out int duration);
             if (!success) errorMessage += "Parameter for OPI_PRESENT Duration: " + parameters[5] + " was invalid.\n";
 
-            success &= int.TryParse(parameters[6], out int responseWindow);
+            success = int.TryParse(parameters[6], out int responseWindow);
             if (!success) errorMessage += "Parameter for OPI_PRESENT Response: " + parameters[6] + " was invalid.\n";
 
             string[] colorParameters = new string[4];
             Array.Copy(parameters, 7, colorParameters, 0, 4);
-            success &= Conversions.ToColor(colorParameters, out Color color);
+            success = Conversions.ToColor(colorParameters, out Color color);
             if (!success) errorMessage += "Parameter for OPI_PRESENT Color: " + string.Join(' ', colorParameters) + " were invalid.\n";
 
-            if (success)
+            if (errorMessage == string.Empty)
             {
                 stimulus = new StaticStimulus()
                 {

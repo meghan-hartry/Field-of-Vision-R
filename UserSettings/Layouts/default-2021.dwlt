@@ -14,16 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_PixelRect:
     serializedVersion: 2
-    x: 2056
-    y: 263.8
-    width: 1904
-    height: 981
+    x: 2048
+    y: 255.8
+    width: 1920
+    height: 997
   m_ShowMode: 4
   m_Title: Test Runner
   m_RootView: {fileID: 6}
   m_MinSize: {x: 875, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
-  m_Maximized: 0
+  m_Maximized: 1
 --- !u!114 &2
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -43,12 +43,12 @@ MonoBehaviour:
     serializedVersion: 2
     x: 0
     y: 30
-    width: 1904
-    height: 931
+    width: 1920
+    height: 947
   m_MinSize: {x: 300, y: 200}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 19
+  controlID: 46
 --- !u!114 &3
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -59,21 +59,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 1
   m_Script: {fileID: 12006, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: 
+  m_Name: TestRunnerWindow
   m_EditorClassIdentifier: 
   m_Children: []
   m_Position:
     serializedVersion: 2
-    x: 1518
+    x: 841
     y: 0
-    width: 386
-    height: 931
-  m_MinSize: {x: 275, y: 50}
+    width: 1079
+    height: 947
+  m_MinSize: {x: 100, y: 100}
   m_MaxSize: {x: 4000, y: 4000}
-  m_ActualView: {fileID: 15}
+  m_ActualView: {fileID: 12}
   m_Panes:
   - {fileID: 15}
-  m_Selected: 0
+  - {fileID: 12}
+  m_Selected: 1
   m_LastSelected: 0
 --- !u!114 &4
 MonoBehaviour:
@@ -92,8 +93,8 @@ MonoBehaviour:
     serializedVersion: 2
     x: 0
     y: 0
-    width: 376
-    height: 706
+    width: 208
+    height: 546
   m_MinSize: {x: 200, y: 200}
   m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 16}
@@ -117,9 +118,9 @@ MonoBehaviour:
   m_Position:
     serializedVersion: 2
     x: 0
-    y: 706
-    width: 1518
-    height: 225
+    y: 546
+    width: 841
+    height: 401
   m_MinSize: {x: 231, y: 271}
   m_MaxSize: {x: 10001, y: 10021}
   m_ActualView: {fileID: 14}
@@ -148,8 +149,8 @@ MonoBehaviour:
     serializedVersion: 2
     x: 0
     y: 0
-    width: 1904
-    height: 981
+    width: 1920
+    height: 997
   m_MinSize: {x: 875, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
   m_UseTopView: 1
@@ -173,7 +174,7 @@ MonoBehaviour:
     serializedVersion: 2
     x: 0
     y: 0
-    width: 1904
+    width: 1920
     height: 30
   m_MinSize: {x: 0, y: 0}
   m_MaxSize: {x: 0, y: 0}
@@ -194,8 +195,8 @@ MonoBehaviour:
   m_Position:
     serializedVersion: 2
     x: 0
-    y: 961
-    width: 1904
+    y: 977
+    width: 1920
     height: 20
   m_MinSize: {x: 0, y: 0}
   m_MaxSize: {x: 0, y: 0}
@@ -218,12 +219,12 @@ MonoBehaviour:
     serializedVersion: 2
     x: 0
     y: 0
-    width: 1518
-    height: 931
+    width: 841
+    height: 947
   m_MinSize: {x: 200, y: 200}
   m_MaxSize: {x: 16192, y: 16192}
   vertical: 1
-  controlID: 28
+  controlID: 47
 --- !u!114 &10
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -243,12 +244,12 @@ MonoBehaviour:
     serializedVersion: 2
     x: 0
     y: 0
-    width: 1518
-    height: 706
+    width: 841
+    height: 546
   m_MinSize: {x: 200, y: 100}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 29
+  controlID: 48
 --- !u!114 &11
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -259,24 +260,23 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 1
   m_Script: {fileID: 12006, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: TestRunnerWindow
+  m_Name: GameView
   m_EditorClassIdentifier: 
   m_Children: []
   m_Position:
     serializedVersion: 2
-    x: 376
+    x: 208
     y: 0
-    width: 1142
-    height: 706
-  m_MinSize: {x: 100, y: 100}
+    width: 633
+    height: 546
+  m_MinSize: {x: 200, y: 200}
   m_MaxSize: {x: 4000, y: 4000}
-  m_ActualView: {fileID: 12}
+  m_ActualView: {fileID: 18}
   m_Panes:
   - {fileID: 17}
   - {fileID: 18}
-  - {fileID: 12}
   - {fileID: 13}
-  m_Selected: 2
+  m_Selected: 1
   m_LastSelected: 1
 --- !u!114 &12
 MonoBehaviour:
@@ -298,21 +298,21 @@ MonoBehaviour:
     m_Tooltip: 
   m_Pos:
     serializedVersion: 2
-    x: 2432
-    y: 293.8
-    width: 1140
-    height: 685
+    x: 2889
+    y: 285.8
+    width: 1078
+    height: 926
   m_ViewDataDictionary: {fileID: 0}
   m_OverlayCanvas:
     m_LastAppliedPresetName: Default
     m_SaveData: []
   m_Spl:
-    ID: 132
+    ID: 145
     splitterInitialOffset: 354.8
     currentActiveSplitter: -1
     realSizes:
-    - 262
-    - 353
+    - 365
+    - 491
     relativeSizes:
     - 0.4261025
     - 0.5738975
@@ -322,7 +322,7 @@ MonoBehaviour:
     maxSizes:
     - 0
     - 0
-    lastTotalSize: 615
+    lastTotalSize: 856
     splitSize: 6
     xOffset: 0
     m_Version: 1
@@ -373,9 +373,9 @@ MonoBehaviour:
       uniqueId: '[Field of Vision (R)][suite]'
       name: Field of Vision (R)
       fullName: Field of Vision (R)
-      resultStatus: 1
-      duration: 2.3295093
-      messages: 
+      resultStatus: 2
+      duration: 0.0838218
+      messages: One or more child tests had errors
       output: 
       stacktrace: 
       notRunnable: 0
@@ -385,13 +385,13 @@ MonoBehaviour:
       categories: []
       parentId: 
       parentUniqueId: 
-    - id: 1009
-      uniqueId: '[Tests][C:/Users/meghan/Documents/Projects/Field of Vision (R)/Library/ScriptAssemblies/Tests.dll][suite]'
-      name: Tests.dll
-      fullName: C:/Users/meghan/Documents/Projects/Field of Vision (R)/Library/ScriptAssemblies/Tests.dll
-      resultStatus: 1
-      duration: 2.2920122
-      messages: 
+    - id: 1013
+      uniqueId: '[FieldofVisionTests.dll][suite]'
+      name: FieldofVisionTests.dll
+      fullName: C:/Users/meghan/Documents/Projects/Field of Vision (R)/Library/ScriptAssemblies/FieldofVisionTests.dll
+      resultStatus: 2
+      duration: 0.0606343
+      messages: One or more child tests had errors
       output: 
       stacktrace: 
       notRunnable: 0
@@ -401,13 +401,13 @@ MonoBehaviour:
       categories: []
       parentId: 1000
       parentUniqueId: '[Field of Vision (R)][suite]'
-    - id: 1001
-      uniqueId: Tests.dll/[Tests][suite]
-      name: Tests
-      fullName: Tests
-      resultStatus: 1
-      duration: 2.2879884
-      messages: 
+    - id: 1014
+      uniqueId: FieldofVisionTests.dll/[FieldofVisionTests][suite]
+      name: FieldofVisionTests
+      fullName: FieldofVisionTests
+      resultStatus: 2
+      duration: 0.0579377
+      messages: One or more child tests had errors
       output: 
       stacktrace: 
       notRunnable: 0
@@ -415,37 +415,46 @@ MonoBehaviour:
       description: 
       isSuite: 1
       categories: []
-      parentId: 1009
-      parentUniqueId: '[Tests][C:/Users/meghan/Documents/Projects/Field of Vision
-        (R)/Library/ScriptAssemblies/Tests.dll][suite]'
+      parentId: 1013
+      parentUniqueId: '[FieldofVisionTests.dll][suite]'
+    - id: 1001
+      uniqueId: FieldofVisionTests.dll/FieldofVisionTests/[FieldofVisionTests][FieldofVisionTests.Tests][suite]
+      name: Tests
+      fullName: FieldofVisionTests.Tests
+      resultStatus: 2
+      duration: 0.0531982
+      messages: One or more child tests had errors
+      output: 
+      stacktrace: 
+      notRunnable: 0
+      ignoredOrSkipped: 0
+      description: 
+      isSuite: 1
+      categories: []
+      parentId: 1014
+      parentUniqueId: FieldofVisionTests.dll/[FieldofVisionTests][suite]
     - id: 1004
-      uniqueId: Tests.dll/Tests/[Tests][Tests.CanConnectClient]
+      uniqueId: FieldofVisionTests.dll/FieldofVisionTests/Tests/[FieldofVisionTests][FieldofVisionTests.Tests.CanConnectClient]
       name: CanConnectClient
-      fullName: Tests.CanConnectClient
-      resultStatus: 1
-      duration: 0.0402937
-      messages: 
-      output: 'Opening server on 127.0.0.1, Port: 50008
-
-        Client connected.
-
-        Cancelling
-        listener.
-
-        Closing Client.
-
-        Connecting socket to force
-        close listener.
-
-        Closing Client.
-
-        Client connected.
-
-        Server
-        stopped listening.
+      fullName: FieldofVisionTests.Tests.CanConnectClient
+      resultStatus: 2
+      duration: 0.0285133
+      messages: 'System.Net.Sockets.SocketException : Only one usage of each socket
+        address (protocol/network address/port) is normally permitted.
 
 '
-      stacktrace: 
+      output: 'Opening server on 127.0.0.1, Port: 50008
+
+'
+      stacktrace: "  at System.Net.Sockets.Socket.Bind (System.Net.EndPoint localEP)
+        [0x00043] in <b8d272a8be0e439da4052df4419466c7>:0 \r\n  at System.Net.Sockets.TcpListener.Start
+        (System.Int32 backlog) [0x00044] in <b8d272a8be0e439da4052df4419466c7>:0
+        \r\n  at System.Net.Sockets.TcpListener.Start () [0x00000] in <b8d272a8be0e439da4052df4419466c7>:0
+        \r\n  at FieldofVision.TCPServer.StartListening () [0x0005c] in C:\\Users\\meghan\\Documents\\Projects\\Field
+        of Vision (R)\\Assets\\Scripts\\TCPServer.cs:102 \r\n  at FieldofVisionTests.Tests+<CanConnectClient>d__6.MoveNext
+        () [0x0002f] in C:\\Users\\meghan\\Documents\\Projects\\Field of Vision (R)\\Assets\\Tests\\TCPServerTests.cs:77
+        \r\n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0004e]
+        in C:\\Users\\meghan\\Documents\\Projects\\Field of Vision (R)\\Library\\PackageCache\\com.unity.test-framework@1.1.29\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:46 "
       notRunnable: 0
       ignoredOrSkipped: 0
       description: 
@@ -453,35 +462,29 @@ MonoBehaviour:
       categories:
       - Uncategorized
       parentId: 1001
-      parentUniqueId: Tests.dll/[Tests][suite]
+      parentUniqueId: FieldofVisionTests.dll/FieldofVisionTests/[FieldofVisionTests][FieldofVisionTests.Tests][suite]
     - id: 1006
-      uniqueId: Tests.dll/Tests/[Tests][Tests.CanDisconnectClient]
+      uniqueId: FieldofVisionTests.dll/FieldofVisionTests/Tests/[FieldofVisionTests][FieldofVisionTests.Tests.CanDisconnectClient]
       name: CanDisconnectClient
-      fullName: Tests.CanDisconnectClient
-      resultStatus: 1
-      duration: 0.0124501
-      messages: 
-      output: 'Opening server on 127.0.0.1, Port: 50008
-
-        Client connected.
-
-        Cancelling
-        listener.
-
-        Closing Client.
-
-        Connecting socket to force
-        close listener.
-
-        Closing Client.
-
-        Client connected.
-
-        Server
-        stopped listening.
+      fullName: FieldofVisionTests.Tests.CanDisconnectClient
+      resultStatus: 2
+      duration: 0.0105908
+      messages: 'System.Net.Sockets.SocketException : Only one usage of each socket
+        address (protocol/network address/port) is normally permitted.
 
 '
-      stacktrace: 
+      output: 'Opening server on 127.0.0.1, Port: 50008
+
+'
+      stacktrace: "  at System.Net.Sockets.Socket.Bind (System.Net.EndPoint localEP)
+        [0x00043] in <b8d272a8be0e439da4052df4419466c7>:0 \r\n  at System.Net.Sockets.TcpListener.Start
+        (System.Int32 backlog) [0x00044] in <b8d272a8be0e439da4052df4419466c7>:0
+        \r\n  at System.Net.Sockets.TcpListener.Start () [0x00000] in <b8d272a8be0e439da4052df4419466c7>:0
+        \r\n  at FieldofVision.TCPServer.StartListening () [0x0005c] in C:\\Users\\meghan\\Documents\\Projects\\Field
+        of Vision (R)\\Assets\\Scripts\\TCPServer.cs:102 \r\n  at FieldofVisionTests.Tests+<CanDisconnectClient>d__8.MoveNext
+        () [0x0002f] in C:\\Users\\meghan\\Documents\\Projects\\Field of Vision (R)\\Assets\\Tests\\TCPServerTests.cs:147
+        \r\n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0004e]
+        in C:\\Users\\meghan\\Documents\\Projects\\Field of Vision (R)\\Library\\PackageCache\\com.unity.test-framework@1.1.29\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:46 "
       notRunnable: 0
       ignoredOrSkipped: 0
       description: 
@@ -489,20 +492,25 @@ MonoBehaviour:
       categories:
       - Uncategorized
       parentId: 1001
-      parentUniqueId: Tests.dll/[Tests][suite]
+      parentUniqueId: FieldofVisionTests.dll/FieldofVisionTests/[FieldofVisionTests][FieldofVisionTests.Tests][suite]
     - id: 1012
-      uniqueId: Tests.dll/Tests/[Tests][Tests.CanReceiveMessage]
+      uniqueId: FieldofVisionTests.dll/FieldofVisionTests/Tests/[FieldofVisionTests][FieldofVisionTests.Tests.CanReceiveMessage]
       name: CanReceiveMessage
-      fullName: Tests.CanReceiveMessage
-      resultStatus: 1
-      duration: 1.2250233
-      messages: 
-      output: "Opening server on 127.0.0.1, Port: 50008\r\nClient connected.\r\nStarted
-        reading.\r\nMockClient Sent: true\r\nRead 4 bytes from socket. \n Data :
-        true\r\nEnqueueing message.\r\nCancelling reading.\r\nServer stopped reading.\r\nCancelling
-        listener.\r\nClosing Client.\r\nConnecting socket to force close listener.\r\nClosing
-        Client.\r\nClient connected.\r\nServer stopped listening.\r\n"
-      stacktrace: 
+      fullName: FieldofVisionTests.Tests.CanReceiveMessage
+      resultStatus: 2
+      duration: 0.0328159
+      messages: 'System.NullReferenceException : Object reference not set to an instance
+        of an object'
+      output: 'Opening server on 127.0.0.1, Port: 50008
+
+        Cancelling reading.
+
+'
+      stacktrace: "  at FieldofVision.TCPServer.StopReading () [0x0000c] in C:\\Users\\meghan\\Documents\\Projects\\Field
+        of Vision (R)\\Assets\\Scripts\\TCPServer.cs:225 \r\n  at FieldofVisionTests.Tests+<CanReceiveMessage>d__14.MoveNext
+        () [0x0009d] in C:\\Users\\meghan\\Documents\\Projects\\Field of Vision (R)\\Assets\\Tests\\TCPServerTests.cs:381
+        \r\n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0004e]
+        in C:\\Users\\meghan\\Documents\\Projects\\Field of Vision (R)\\Library\\PackageCache\\com.unity.test-framework@1.1.29\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:46 "
       notRunnable: 0
       ignoredOrSkipped: 0
       description: 
@@ -510,40 +518,29 @@ MonoBehaviour:
       categories:
       - Uncategorized
       parentId: 1001
-      parentUniqueId: Tests.dll/[Tests][suite]
+      parentUniqueId: FieldofVisionTests.dll/FieldofVisionTests/[FieldofVisionTests][FieldofVisionTests.Tests][suite]
     - id: 1007
-      uniqueId: Tests.dll/Tests/[Tests][Tests.CanSendMessage]
+      uniqueId: FieldofVisionTests.dll/FieldofVisionTests/Tests/[FieldofVisionTests][FieldofVisionTests.Tests.CanSendMessage]
       name: CanSendMessage
-      fullName: Tests.CanSendMessage
-      resultStatus: 1
-      duration: 0.0046524
-      messages: 
-      output: 'Opening server on 127.0.0.1, Port: 50008
-
-        Client connected.
-
-        [Server]
-        Response has been written
-
-        MockClient Received: true
-
-        Cancelling
-        listener.
-
-        Closing Client.
-
-        Connecting socket to force
-        close listener.
-
-        Closing Client.
-
-        Client connected.
-
-        Server
-        stopped listening.
+      fullName: FieldofVisionTests.Tests.CanSendMessage
+      resultStatus: 2
+      duration: 0.0118066
+      messages: 'System.Net.Sockets.SocketException : Only one usage of each socket
+        address (protocol/network address/port) is normally permitted.
 
 '
-      stacktrace: 
+      output: 'Opening server on 127.0.0.1, Port: 50008
+
+'
+      stacktrace: "  at System.Net.Sockets.Socket.Bind (System.Net.EndPoint localEP)
+        [0x00043] in <b8d272a8be0e439da4052df4419466c7>:0 \r\n  at System.Net.Sockets.TcpListener.Start
+        (System.Int32 backlog) [0x00044] in <b8d272a8be0e439da4052df4419466c7>:0
+        \r\n  at System.Net.Sockets.TcpListener.Start () [0x00000] in <b8d272a8be0e439da4052df4419466c7>:0
+        \r\n  at FieldofVision.TCPServer.StartListening () [0x0005c] in C:\\Users\\meghan\\Documents\\Projects\\Field
+        of Vision (R)\\Assets\\Scripts\\TCPServer.cs:102 \r\n  at FieldofVisionTests.Tests+<CanSendMessage>d__9.MoveNext
+        () [0x0002f] in C:\\Users\\meghan\\Documents\\Projects\\Field of Vision (R)\\Assets\\Tests\\TCPServerTests.cs:180
+        \r\n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0004e]
+        in C:\\Users\\meghan\\Documents\\Projects\\Field of Vision (R)\\Library\\PackageCache\\com.unity.test-framework@1.1.29\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:46 "
       notRunnable: 0
       ignoredOrSkipped: 0
       description: 
@@ -551,42 +548,29 @@ MonoBehaviour:
       categories:
       - Uncategorized
       parentId: 1001
-      parentUniqueId: Tests.dll/[Tests][suite]
+      parentUniqueId: FieldofVisionTests.dll/FieldofVisionTests/[FieldofVisionTests][FieldofVisionTests.Tests][suite]
     - id: 1009
-      uniqueId: Tests.dll/Tests/[Tests][Tests.CanStartReading]
+      uniqueId: FieldofVisionTests.dll/FieldofVisionTests/Tests/[FieldofVisionTests][FieldofVisionTests.Tests.CanStartReading]
       name: CanStartReading
-      fullName: Tests.CanStartReading
-      resultStatus: 1
-      duration: 0.3341872
-      messages: 
-      output: 'Opening server on 127.0.0.1, Port: 50008
-
-        Client connected.
-
-        Started
-        reading.
-
-        Cancelling listener.
-
-        Cancelling reading.
-
-        Server
-        stopped reading.
-
-        Closing Client.
-
-        Connecting socket to
-        force close listener.
-
-        Closing Client.
-
-        Client connected.
-
-        Server
-        stopped listening.
+      fullName: FieldofVisionTests.Tests.CanStartReading
+      resultStatus: 2
+      duration: 0.0100396
+      messages: 'System.Net.Sockets.SocketException : Only one usage of each socket
+        address (protocol/network address/port) is normally permitted.
 
 '
-      stacktrace: 
+      output: 'Opening server on 127.0.0.1, Port: 50008
+
+'
+      stacktrace: "  at System.Net.Sockets.Socket.Bind (System.Net.EndPoint localEP)
+        [0x00043] in <b8d272a8be0e439da4052df4419466c7>:0 \r\n  at System.Net.Sockets.TcpListener.Start
+        (System.Int32 backlog) [0x00044] in <b8d272a8be0e439da4052df4419466c7>:0
+        \r\n  at System.Net.Sockets.TcpListener.Start () [0x00000] in <b8d272a8be0e439da4052df4419466c7>:0
+        \r\n  at FieldofVision.TCPServer.StartListening () [0x0005c] in C:\\Users\\meghan\\Documents\\Projects\\Field
+        of Vision (R)\\Assets\\Scripts\\TCPServer.cs:102 \r\n  at FieldofVisionTests.Tests+<CanStartReading>d__11.MoveNext
+        () [0x0002f] in C:\\Users\\meghan\\Documents\\Projects\\Field of Vision (R)\\Assets\\Tests\\TCPServerTests.cs:254
+        \r\n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0004e]
+        in C:\\Users\\meghan\\Documents\\Projects\\Field of Vision (R)\\Library\\PackageCache\\com.unity.test-framework@1.1.29\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:46 "
       notRunnable: 0
       ignoredOrSkipped: 0
       description: 
@@ -594,42 +578,29 @@ MonoBehaviour:
       categories:
       - Uncategorized
       parentId: 1001
-      parentUniqueId: Tests.dll/[Tests][suite]
-    - id: 1009
-      uniqueId: Tests.dll/Tests/[Tests][Tests.CanStopReading]
+      parentUniqueId: FieldofVisionTests.dll/FieldofVisionTests/[FieldofVisionTests][FieldofVisionTests.Tests][suite]
+    - id: 1010
+      uniqueId: FieldofVisionTests.dll/FieldofVisionTests/Tests/[FieldofVisionTests][FieldofVisionTests.Tests.CanStopReading]
       name: CanStopReading
-      fullName: Tests.CanStopReading
-      resultStatus: 1
-      duration: 0.2173509
-      messages: 
-      output: 'Opening server on 127.0.0.1, Port: 50008
-
-        Started reading.
-
-        Client
-        connected.
-
-        Cancelling reading.
-
-        Server stopped reading.
-
-        Cancelling
-        listener.
-
-        Closing Client.
-
-        Connecting socket to force
-        close listener.
-
-        Closing Client.
-
-        Client connected.
-
-        Server
-        stopped listening.
+      fullName: FieldofVisionTests.Tests.CanStopReading
+      resultStatus: 2
+      duration: 0.0096565
+      messages: 'System.Net.Sockets.SocketException : Only one usage of each socket
+        address (protocol/network address/port) is normally permitted.
 
 '
-      stacktrace: 
+      output: 'Opening server on 127.0.0.1, Port: 50008
+
+'
+      stacktrace: "  at System.Net.Sockets.Socket.Bind (System.Net.EndPoint localEP)
+        [0x00043] in <b8d272a8be0e439da4052df4419466c7>:0 \r\n  at System.Net.Sockets.TcpListener.Start
+        (System.Int32 backlog) [0x00044] in <b8d272a8be0e439da4052df4419466c7>:0
+        \r\n  at System.Net.Sockets.TcpListener.Start () [0x00000] in <b8d272a8be0e439da4052df4419466c7>:0
+        \r\n  at FieldofVision.TCPServer.StartListening () [0x0005c] in C:\\Users\\meghan\\Documents\\Projects\\Field
+        of Vision (R)\\Assets\\Scripts\\TCPServer.cs:102 \r\n  at FieldofVisionTests.Tests+<CanStopReading>d__12.MoveNext
+        () [0x00057] in C:\\Users\\meghan\\Documents\\Projects\\Field of Vision (R)\\Assets\\Tests\\TCPServerTests.cs:291
+        \r\n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0004e]
+        in C:\\Users\\meghan\\Documents\\Projects\\Field of Vision (R)\\Library\\PackageCache\\com.unity.test-framework@1.1.29\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:46 "
       notRunnable: 0
       ignoredOrSkipped: 0
       description: 
@@ -637,39 +608,29 @@ MonoBehaviour:
       categories:
       - Uncategorized
       parentId: 1001
-      parentUniqueId: Tests.dll/[Tests][suite]
+      parentUniqueId: FieldofVisionTests.dll/FieldofVisionTests/[FieldofVisionTests][FieldofVisionTests.Tests][suite]
     - id: 1005
-      uniqueId: Tests.dll/Tests/[Tests][Tests.ConnectingTwoClientsClosesFirst]
+      uniqueId: FieldofVisionTests.dll/FieldofVisionTests/Tests/[FieldofVisionTests][FieldofVisionTests.Tests.ConnectingTwoClientsClosesFirst]
       name: ConnectingTwoClientsClosesFirst
-      fullName: Tests.ConnectingTwoClientsClosesFirst
-      resultStatus: 1
-      duration: 0.1088038
-      messages: 
-      output: 'Opening server on 127.0.0.1, Port: 50008
-
-        Client connected.
-
-        Closing
-        Client.
-
-        Client connected.
-
-        Cancelling listener.
-
-        Closing
-        Client.
-
-        Connecting socket to force close listener.
-
-        Closing
-        Client.
-
-        Client connected.
-
-        Server stopped listening.
+      fullName: FieldofVisionTests.Tests.ConnectingTwoClientsClosesFirst
+      resultStatus: 2
+      duration: 0.0101691
+      messages: 'System.Net.Sockets.SocketException : Only one usage of each socket
+        address (protocol/network address/port) is normally permitted.
 
 '
-      stacktrace: 
+      output: 'Opening server on 127.0.0.1, Port: 50008
+
+'
+      stacktrace: "  at System.Net.Sockets.Socket.Bind (System.Net.EndPoint localEP)
+        [0x00043] in <b8d272a8be0e439da4052df4419466c7>:0 \r\n  at System.Net.Sockets.TcpListener.Start
+        (System.Int32 backlog) [0x00044] in <b8d272a8be0e439da4052df4419466c7>:0
+        \r\n  at System.Net.Sockets.TcpListener.Start () [0x00000] in <b8d272a8be0e439da4052df4419466c7>:0
+        \r\n  at FieldofVision.TCPServer.StartListening () [0x0005c] in C:\\Users\\meghan\\Documents\\Projects\\Field
+        of Vision (R)\\Assets\\Scripts\\TCPServer.cs:102 \r\n  at FieldofVisionTests.Tests+<ConnectingTwoClientsClosesFirst>d__7.MoveNext
+        () [0x0003a] in C:\\Users\\meghan\\Documents\\Projects\\Field of Vision (R)\\Assets\\Tests\\TCPServerTests.cs:108
+        \r\n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0004e]
+        in C:\\Users\\meghan\\Documents\\Projects\\Field of Vision (R)\\Library\\PackageCache\\com.unity.test-framework@1.1.29\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:46 "
       notRunnable: 0
       ignoredOrSkipped: 0
       description: 
@@ -677,20 +638,29 @@ MonoBehaviour:
       categories:
       - Uncategorized
       parentId: 1001
-      parentUniqueId: Tests.dll/[Tests][suite]
+      parentUniqueId: FieldofVisionTests.dll/FieldofVisionTests/[FieldofVisionTests][FieldofVisionTests.Tests][suite]
     - id: 1008
-      uniqueId: Tests.dll/Tests/[Tests][Tests.MessageSendsToNewestClient]
+      uniqueId: FieldofVisionTests.dll/FieldofVisionTests/Tests/[FieldofVisionTests][FieldofVisionTests.Tests.MessageSendsToNewestClient]
       name: MessageSendsToNewestClient
-      fullName: Tests.MessageSendsToNewestClient
-      resultStatus: 1
-      duration: 0.1084709
-      messages: 
-      output: "Opening server on 127.0.0.1, Port: 50008\r\nClient connected.\r\nClosing
-        Client.\r\nClient connected.\r\n[Server] Response has been written\r\nMockClient
-        Received: \r\nMockClient Received: true\r\nCancelling listener.\r\nClosing
-        Client.\r\nConnecting socket to force close listener.\r\nClosing Client.\r\nClient
-        connected.\r\nServer stopped listening.\r\n"
-      stacktrace: 
+      fullName: FieldofVisionTests.Tests.MessageSendsToNewestClient
+      resultStatus: 2
+      duration: 0.0111293
+      messages: 'System.Net.Sockets.SocketException : Only one usage of each socket
+        address (protocol/network address/port) is normally permitted.
+
+'
+      output: 'Opening server on 127.0.0.1, Port: 50008
+
+'
+      stacktrace: "  at System.Net.Sockets.Socket.Bind (System.Net.EndPoint localEP)
+        [0x00043] in <b8d272a8be0e439da4052df4419466c7>:0 \r\n  at System.Net.Sockets.TcpListener.Start
+        (System.Int32 backlog) [0x00044] in <b8d272a8be0e439da4052df4419466c7>:0
+        \r\n  at System.Net.Sockets.TcpListener.Start () [0x00000] in <b8d272a8be0e439da4052df4419466c7>:0
+        \r\n  at FieldofVision.TCPServer.StartListening () [0x0005c] in C:\\Users\\meghan\\Documents\\Projects\\Field
+        of Vision (R)\\Assets\\Scripts\\TCPServer.cs:102 \r\n  at FieldofVisionTests.Tests+<MessageSendsToNewestClient>d__10.MoveNext
+        () [0x0003a] in C:\\Users\\meghan\\Documents\\Projects\\Field of Vision (R)\\Assets\\Tests\\TCPServerTests.cs:214
+        \r\n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0004e]
+        in C:\\Users\\meghan\\Documents\\Projects\\Field of Vision (R)\\Library\\PackageCache\\com.unity.test-framework@1.1.29\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:46 "
       notRunnable: 0
       ignoredOrSkipped: 0
       description: 
@@ -698,28 +668,25 @@ MonoBehaviour:
       categories:
       - Uncategorized
       parentId: 1001
-      parentUniqueId: Tests.dll/[Tests][suite]
+      parentUniqueId: FieldofVisionTests.dll/FieldofVisionTests/[FieldofVisionTests][FieldofVisionTests.Tests][suite]
     - id: 1002
-      uniqueId: Tests.dll/Tests/[Tests][Tests.StartListeningStartsTask]
+      uniqueId: FieldofVisionTests.dll/FieldofVisionTests/Tests/[FieldofVisionTests][FieldofVisionTests.Tests.StartListeningStartsTask]
       name: StartListeningStartsTask
-      fullName: Tests.StartListeningStartsTask
-      resultStatus: 1
-      duration: 0.002125
-      messages: 
+      fullName: FieldofVisionTests.Tests.StartListeningStartsTask
+      resultStatus: 2
+      duration: 0.0512568
+      messages: "  Expected: WaitingForActivation\r\n  But was:  null\r\n"
       output: 'Opening server on 127.0.0.1, Port: 50008
 
-        Cancelling listener.
+'
+      stacktrace: 'at FieldofVisionTests.Tests+<StartListeningStartsTask>d__4.MoveNext
+        () [0x00032] in C:\Users\meghan\Documents\Projects\Field of Vision (R)\Assets\Tests\TCPServerTests.cs:28
 
-        Connecting
-        socket to force close listener.
-
-        Client connected.
-
-        Server
-        stopped listening.
+        at
+        UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0004e]
+        in C:\Users\meghan\Documents\Projects\Field of Vision (R)\Library\PackageCache\com.unity.test-framework@1.1.29\UnityEngine.TestRunner\NUnitExtensions\Attributes\TestEnumerator.cs:46
 
 '
-      stacktrace: 
       notRunnable: 0
       ignoredOrSkipped: 0
       description: 
@@ -727,42 +694,29 @@ MonoBehaviour:
       categories:
       - Uncategorized
       parentId: 1001
-      parentUniqueId: Tests.dll/[Tests][suite]
+      parentUniqueId: FieldofVisionTests.dll/FieldofVisionTests/[FieldofVisionTests][FieldofVisionTests.Tests][suite]
     - id: 1011
-      uniqueId: Tests.dll/Tests/[Tests][Tests.StopListeningStopsReading]
+      uniqueId: FieldofVisionTests.dll/FieldofVisionTests/Tests/[FieldofVisionTests][FieldofVisionTests.Tests.StopListeningStopsReading]
       name: StopListeningStopsReading
-      fullName: Tests.StopListeningStopsReading
-      resultStatus: 1
-      duration: 0.2135087
-      messages: 
-      output: 'Opening server on 127.0.0.1, Port: 50008
-
-        Started reading.
-
-        Client
-        connected.
-
-        Cancelling listener.
-
-        Cancelling reading.
-
-        Server
-        stopped reading.
-
-        Closing Client.
-
-        Connecting socket to
-        force close listener.
-
-        Closing Client.
-
-        Client connected.
-
-        Server
-        stopped listening.
+      fullName: FieldofVisionTests.Tests.StopListeningStopsReading
+      resultStatus: 2
+      duration: 0.0079145
+      messages: 'System.Net.Sockets.SocketException : Only one usage of each socket
+        address (protocol/network address/port) is normally permitted.
 
 '
-      stacktrace: 
+      output: 'Opening server on 127.0.0.1, Port: 50008
+
+'
+      stacktrace: "  at System.Net.Sockets.Socket.Bind (System.Net.EndPoint localEP)
+        [0x00043] in <b8d272a8be0e439da4052df4419466c7>:0 \r\n  at System.Net.Sockets.TcpListener.Start
+        (System.Int32 backlog) [0x00044] in <b8d272a8be0e439da4052df4419466c7>:0
+        \r\n  at System.Net.Sockets.TcpListener.Start () [0x00000] in <b8d272a8be0e439da4052df4419466c7>:0
+        \r\n  at FieldofVision.TCPServer.StartListening () [0x0005c] in C:\\Users\\meghan\\Documents\\Projects\\Field
+        of Vision (R)\\Assets\\Scripts\\TCPServer.cs:102 \r\n  at FieldofVisionTests.Tests+<StopListeningStopsReading>d__13.MoveNext
+        () [0x00057] in C:\\Users\\meghan\\Documents\\Projects\\Field of Vision (R)\\Assets\\Tests\\TCPServerTests.cs:332
+        \r\n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0004e]
+        in C:\\Users\\meghan\\Documents\\Projects\\Field of Vision (R)\\Library\\PackageCache\\com.unity.test-framework@1.1.29\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:46 "
       notRunnable: 0
       ignoredOrSkipped: 0
       description: 
@@ -770,28 +724,29 @@ MonoBehaviour:
       categories:
       - Uncategorized
       parentId: 1001
-      parentUniqueId: Tests.dll/[Tests][suite]
+      parentUniqueId: FieldofVisionTests.dll/FieldofVisionTests/[FieldofVisionTests][FieldofVisionTests.Tests][suite]
     - id: 1003
-      uniqueId: Tests.dll/Tests/[Tests][Tests.StopListeningStopsTask]
+      uniqueId: FieldofVisionTests.dll/FieldofVisionTests/Tests/[FieldofVisionTests][FieldofVisionTests.Tests.StopListeningStopsTask]
       name: StopListeningStopsTask
-      fullName: Tests.StopListeningStopsTask
-      resultStatus: 1
-      duration: 0.002579
-      messages: 
-      output: 'Opening server on 127.0.0.1, Port: 50008
-
-        Cancelling listener.
-
-        Connecting
-        socket to force close listener.
-
-        Client connected.
-
-        Server
-        stopped listening.
+      fullName: FieldofVisionTests.Tests.StopListeningStopsTask
+      resultStatus: 2
+      duration: 0.0446967
+      messages: 'System.Net.Sockets.SocketException : Only one usage of each socket
+        address (protocol/network address/port) is normally permitted.
 
 '
-      stacktrace: 
+      output: 'Opening server on 127.0.0.1, Port: 50008
+
+'
+      stacktrace: "  at System.Net.Sockets.Socket.Bind (System.Net.EndPoint localEP)
+        [0x00043] in <b8d272a8be0e439da4052df4419466c7>:0 \r\n  at System.Net.Sockets.TcpListener.Start
+        (System.Int32 backlog) [0x00044] in <b8d272a8be0e439da4052df4419466c7>:0
+        \r\n  at System.Net.Sockets.TcpListener.Start () [0x00000] in <b8d272a8be0e439da4052df4419466c7>:0
+        \r\n  at FieldofVision.TCPServer.StartListening () [0x0005c] in C:\\Users\\meghan\\Documents\\Projects\\Field
+        of Vision (R)\\Assets\\Scripts\\TCPServer.cs:102 \r\n  at FieldofVisionTests.Tests+<StopListeningStopsTask>d__5.MoveNext
+        () [0x0004c] in C:\\Users\\meghan\\Documents\\Projects\\Field of Vision (R)\\Assets\\Tests\\TCPServerTests.cs:46
+        \r\n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0004e]
+        in C:\\Users\\meghan\\Documents\\Projects\\Field of Vision (R)\\Library\\PackageCache\\com.unity.test-framework@1.1.29\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:46 "
       notRunnable: 0
       ignoredOrSkipped: 0
       description: 
@@ -799,28 +754,30 @@ MonoBehaviour:
       categories:
       - Uncategorized
       parentId: 1001
-      parentUniqueId: Tests.dll/[Tests][suite]
-    m_ResultText: 'StopListeningStopsTask (0.003s)
+      parentUniqueId: FieldofVisionTests.dll/FieldofVisionTests/[FieldofVisionTests][FieldofVisionTests.Tests][suite]
+    m_ResultText: 'StopListeningStopsTask (0.045s)
 
       ---
 
-      Opening server
-      on 127.0.0.1, Port: 50008
+      System.Net.Sockets.SocketException
+      : Only one usage of each socket address (protocol/network address/port) is
+      normally permitted.
 
-      Cancelling listener.
-
-      Connecting socket
-      to force close listener.
-
-      Client connected.
-
-      Server stopped listening.'
-    m_ResultStacktrace: 
+'
+    m_ResultStacktrace: "  at System.Net.Sockets.Socket.Bind (System.Net.EndPoint
+      localEP) [0x00043] in <b8d272a8be0e439da4052df4419466c7>:0 \r\n  at System.Net.Sockets.TcpListener.Start
+      (System.Int32 backlog) [0x00044] in <b8d272a8be0e439da4052df4419466c7>:0 \r\n 
+      at System.Net.Sockets.TcpListener.Start () [0x00000] in <b8d272a8be0e439da4052df4419466c7>:0
+      \r\n  at FieldofVision.TCPServer.StartListening () [0x0005c] in C:\\Users\\meghan\\Documents\\Projects\\Field
+      of Vision (R)\\Assets\\Scripts\\TCPServer.cs:102 \r\n  at FieldofVisionTests.Tests+<StopListeningStopsTask>d__5.MoveNext
+      () [0x0004c] in C:\\Users\\meghan\\Documents\\Projects\\Field of Vision (R)\\Assets\\Tests\\TCPServerTests.cs:46
+      \r\n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0004e]
+      in C:\\Users\\meghan\\Documents\\Projects\\Field of Vision (R)\\Library\\PackageCache\\com.unity.test-framework@1.1.29\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:46 "
     m_TestListState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: cf69bfe9
-      m_LastClickedID: -373331505
-      m_ExpandedIDs: a02ea403db7e5f358359db41ffffff7f
+      m_SelectedIDs: d20698eb
+      m_LastClickedID: -342358318
+      m_ExpandedIDs: 2c668cad5fa005b3635754ef1cfb60f1a02ea403db7e5f358359db4179ac6f53ffffff7f
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -894,10 +851,10 @@ MonoBehaviour:
     m_Tooltip: 
   m_Pos:
     serializedVersion: 2
-    x: 2056
-    y: 999.8
-    width: 1517
-    height: 204
+    x: 2048
+    y: 831.8
+    width: 840
+    height: 380
   m_ViewDataDictionary: {fileID: 0}
   m_OverlayCanvas:
     m_LastAppliedPresetName: Default
@@ -915,22 +872,22 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Tests
+    - Assets/Scripts
     m_Globs: []
     m_OriginalText: 
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Assets/Tests
+  - Assets/Scripts
   m_LastFoldersGridSize: -1
   m_LastProjectPath: C:\Users\meghan\Documents\Projects\Field of Vision (R)
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 168}
-    m_SelectedIDs: 04550000
-    m_LastClickedID: 21764
-    m_ExpandedIDs: 00000000d6540000d8540000da540000dc540000de540000e0540000e2540000e454000000ca9a3b
+    scrollPos: {x: 0, y: 44}
+    m_SelectedIDs: e8540000
+    m_LastClickedID: 21736
+    m_ExpandedIDs: 00000000da540000dc540000de540000e0540000e2540000e4540000e6540000e854000000ca9a3b
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -946,7 +903,7 @@ MonoBehaviour:
       m_IsRenaming: 0
       m_OriginalEventType: 11
       m_IsRenamingFilename: 1
-      m_ClientGUIView: {fileID: 0}
+      m_ClientGUIView: {fileID: 5}
     m_SearchString: 
     m_CreateAssetUtility:
       m_EndAction: {fileID: 0}
@@ -958,7 +915,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 00000000d6540000d8540000da540000dc540000de540000e0540000e2540000e4540000
+    m_ExpandedIDs: 00000000da540000dc540000de540000e0540000e2540000e4540000e6540000e8540000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1002,7 +959,7 @@ MonoBehaviour:
       m_IsRenaming: 0
       m_OriginalEventType: 11
       m_IsRenamingFilename: 1
-      m_ClientGUIView: {fileID: 7}
+      m_ClientGUIView: {fileID: 11}
     m_CreateAssetUtility:
       m_EndAction: {fileID: 0}
       m_InstanceID: 0
@@ -1013,7 +970,7 @@ MonoBehaviour:
     m_ScrollPosition: {x: 0, y: 0}
     m_GridSize: 64
   m_SkipHiddenPackages: 0
-  m_DirectoriesAreaWidth: 505
+  m_DirectoriesAreaWidth: 423
 --- !u!114 &15
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -1034,10 +991,10 @@ MonoBehaviour:
     m_Tooltip: 
   m_Pos:
     serializedVersion: 2
-    x: 3574
-    y: 293.8
-    width: 385
-    height: 910
+    x: 3355
+    y: 285.8
+    width: 612
+    height: 926
   m_ViewDataDictionary: {fileID: 0}
   m_OverlayCanvas:
     m_LastAppliedPresetName: Default
@@ -1075,10 +1032,10 @@ MonoBehaviour:
     m_Tooltip: 
   m_Pos:
     serializedVersion: 2
-    x: 2056
-    y: 293.8
-    width: 375
-    height: 685
+    x: 2048
+    y: 285.8
+    width: 207
+    height: 525
   m_ViewDataDictionary: {fileID: 0}
   m_OverlayCanvas:
     m_LastAppliedPresetName: Default
@@ -1088,7 +1045,7 @@ MonoBehaviour:
       scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: 56c8fdffc809feffa20bfeff580dfeff020ffeff0c11feffb213feff8617feff4678fefff279feff367efeff4c80feff1883feff7897feff54aafeff2cb0feff7ebefeff68ecfeff4803ffff8217ffff6229ffff3e40ffff1844ffff3267ffff808ffffff2c1ffff6ef8ffff28fbffff
+      m_ExpandedIDs: aa9cfffff2c3ffff20daffff8af0ffff28fbffff
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -1437,10 +1394,10 @@ MonoBehaviour:
     m_Tooltip: 
   m_Pos:
     serializedVersion: 2
-    x: 404
-    y: 73.6
-    width: 1227
-    height: 595
+    x: 2256
+    y: 285.8
+    width: 631
+    height: 525
   m_ViewDataDictionary: {fileID: 0}
   m_OverlayCanvas:
     m_LastAppliedPresetName: Default
@@ -1451,7 +1408,7 @@ MonoBehaviour:
   m_ShowGizmos: 0
   m_TargetDisplay: 0
   m_ClearColor: {r: 0, g: 0, b: 0, a: 0}
-  m_TargetSize: {x: 1227, y: 574}
+  m_TargetSize: {x: 631, y: 504}
   m_TextureFilterMode: 0
   m_TextureHideFlags: 61
   m_RenderIMGUI: 1
@@ -1466,10 +1423,10 @@ MonoBehaviour:
     m_VRangeLocked: 0
     hZoomLockedByDefault: 0
     vZoomLockedByDefault: 0
-    m_HBaseRangeMin: -613.5
-    m_HBaseRangeMax: 613.5
-    m_VBaseRangeMin: -287
-    m_VBaseRangeMax: 287
+    m_HBaseRangeMin: -315.5
+    m_HBaseRangeMax: 315.5
+    m_VBaseRangeMin: -252
+    m_VBaseRangeMax: 252
     m_HAllowExceedBaseRangeMin: 1
     m_HAllowExceedBaseRangeMax: 1
     m_VAllowExceedBaseRangeMin: 1
@@ -1487,23 +1444,23 @@ MonoBehaviour:
       serializedVersion: 2
       x: 0
       y: 21
-      width: 1227
-      height: 574
+      width: 631
+      height: 504
     m_Scale: {x: 1, y: 1}
-    m_Translation: {x: 613.5, y: 287}
+    m_Translation: {x: 315.5, y: 252}
     m_MarginLeft: 0
     m_MarginRight: 0
     m_MarginTop: 0
     m_MarginBottom: 0
     m_LastShownAreaInsideMargins:
       serializedVersion: 2
-      x: -613.5
-      y: -287
-      width: 1227
-      height: 574
+      x: -315.5
+      y: -252
+      width: 631
+      height: 504
     m_MinimalGUI: 1
   m_defaultScale: 1
-  m_LastWindowPixelSize: {x: 1227, y: 595}
+  m_LastWindowPixelSize: {x: 631, y: 525}
   m_ClearInEditMode: 1
   m_NoCameraWarning: 1
   m_LowResolutionForAspectRatios: 00000000000000000000
@@ -1529,10 +1486,10 @@ MonoBehaviour:
     m_Tooltip: 
   m_Pos:
     serializedVersion: 2
-    x: 0
-    y: 689.60004
-    width: 1632
-    height: 382
+    x: 2048
+    y: 831.8
+    width: 1306
+    height: 380
   m_ViewDataDictionary: {fileID: 0}
   m_OverlayCanvas:
     m_LastAppliedPresetName: Default

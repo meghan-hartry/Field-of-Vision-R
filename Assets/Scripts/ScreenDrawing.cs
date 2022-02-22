@@ -2,42 +2,55 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace FieldofVision
 {
-    internal class PresentationControl : MonoBehaviour
+    [Serializable]
+    internal class KeyPressedEvent : UnityEvent<float> { }
+
+    internal class ScreenDrawing : MonoBehaviour
     {
-        /// <summary>
-        /// List of the response received for each stimulus presentation.
-        /// </summary>
-        internal List<Response> Responses = new List<Response>();
+        #region Events
 
-        /// <summary>
-        /// Stimulus GameObject in Unity.
-        /// </summary>
+        private KeyPressedEvent KeyPressedEvent = new KeyPressedEvent();
+
+        #endregion
+
+        #region Properties and Fields
+
+        private readonly List<Response> Responses = new List<Response>();
         private GameObject StimulusObj;
-
-        /// <summary>
-        /// Active Camera GameObject in Unity.
-        /// </summary>
         private GameObject ActiveCamera;
-
-        /// <summary>
-        /// Inactive Camera GameObject in Unity.
-        /// </summary>
         private GameObject InactiveCamera;
-
-        /// <summary>
-        /// Start time of a stimulus presentation.
-        /// </summary>
-        private float PresentationStartTime;
+        private float PresentationStartTime = 0;
+        private int NumberOfResponses = 0;
 
         private MainExecution Main => MainExecution.MainInstance;
 
+        #endregion
+
+        #region MonoBehavior Override Methods
+
+        void Update()
+        {
+            // Record user input.
+            if (Input.anyKeyDown)
+            {
+                var KeyPressedTime = Time.time;
+                Debug.Log("Key pressed at time: " + KeyPressedTime);
+                KeyPressedEvent.Invoke(KeyPressedTime);
+            }
+        }
+
+        #endregion
+
+        #region Internal Methods
+
         /// <summary>
-        /// Helper method for PresentCoroutine.
+        /// Presents a static stimulus for the given duration and wait for response.
+        /// Response is added to the test's Responses list.
         /// </summary>
         internal void Present(Stimulus stimulus)
         {
@@ -52,14 +65,16 @@ namespace FieldofVision
             catch (Exception e)
             {
                 Debug.LogError(e.Message);
-                Main.ErrorOccurred.Invoke(e.Message);
             }
             finally 
             {
-                Interlocked.Decrement(ref Main.ActionsExecuting);
+                Main.DecrementActionsExecuting();
             }
         }
 
+        /// <summary>
+        /// Sets the background, fixation, and active eye parameters.
+        /// </summary>
         internal void SetBackground(Color color, FixationPoint fixationPoint, Eye eye) 
         {
             try
@@ -71,7 +86,7 @@ namespace FieldofVision
                 var fixationObj = GameObject.Find("Fixation");
                 if (fixationObj == null)
                 {
-                    Main.ErrorOccurred.Invoke("Could not find Fixation GameObject.");
+                    Debug.LogError("Could not find Fixation GameObject.");
                     return;
                 }
 
@@ -99,31 +114,38 @@ namespace FieldofVision
             catch (Exception e)
             {
                 Debug.LogError(e.Message);
-                Main.ErrorOccurred.Invoke(e.Message);
             }
             finally
             {
-                Interlocked.Decrement(ref Main.ActionsExecuting);
+                Main.DecrementActionsExecuting();
             }
         }
 
-        /// <summary>
-        /// Presents a static stimulus for the given duration and wait for response.
-        /// Response is added to the test's Responses list.
-        /// </summary>
+        #endregion
+
+        #region Private Methods
+
+        private void OnKeyPressed(float time)
+        {
+            var responseTime = (int)((time - PresentationStartTime) * 1000);
+            var response = new Response(true, responseTime);
+
+            Responses.Add(response);
+        }
+
         private IEnumerator PresentCoroutine(StaticStimulus stimulus)
         {
             StimulusObj = GameObject.Find("Stimulus");
             if (StimulusObj == null)
             {
-                Main.ErrorOccurred.Invoke("Could not find Stimulus GameObject.");
+                Debug.LogError("Could not find Stimulus GameObject.");
                 yield break;
             }
 
             var fixationObj = GameObject.Find("Fixation");
             if (fixationObj == null)
             {
-                Main.ErrorOccurred.Invoke("Could not find Fixation GameObject.");
+                Debug.LogError("Could not find Fixation GameObject.");
                 yield break;
             }
 
@@ -146,67 +168,50 @@ namespace FieldofVision
             var zScale = StimulusObj.transform.localScale.z;
             StimulusObj.transform.localScale = new Vector3(stimulus.Size, stimulus.Size, zScale);
 
-            // Set visible
+            // Get how long to wait after stimulus is presented for a response.
+            float secondsToWait = (stimulus.ResponseWindow - stimulus.Duration)/1000;
+            if (secondsToWait < 0) secondsToWait = 0;
+
+            // Record information
+            NumberOfResponses = Responses.Count;
+            PresentationStartTime = Time.time;
+
+            // Show stimulus
             StimulusObj.GetComponent<Renderer>().enabled = true;
 
-            PresentationStartTime = Time.time;
-            Debug.Log("Presentation start time: " + PresentationStartTime.ToString());
+            // Listen for key presses
+            KeyPressedEvent.AddListener(OnKeyPressed);
 
-            // Wait for Duration of stimulus presentation. Convert ms to s.
+            // Wait for duration of stimulus presentation. Convert ms to s.
             yield return new WaitForSeconds((float)stimulus.Duration / 1000);
 
-            // Set invisible
+            // Hide stimulus
             StimulusObj.GetComponent<Renderer>().enabled = false;
 
-            // How long to wait in ms after stimulus is presented for a response.
-            var wait = stimulus.ResponseWindow - stimulus.Duration;
-
-            if (wait > 0)
-            {
-                // Wait for Response Window after stimulus presentation in seconds.
-                yield return WaitForResponseCoroutine((float)wait / 1000);
-            }
-            Debug.Log("Presentation completed.");
-        }
-
-        private IEnumerator WaitForResponseCoroutine(float timeoutMs)
-        {
-            // Reset keyPressed bool.
-            Main.InputProcessor.KeyPressed = false;
-
-            var timeoutSeconds = (float)timeoutMs / 1000;
-            var previousCount = Responses.Count;
+            // Wait for the Response Window after stimulus presentation in seconds.
             float startTime = Time.time;
-            float elapsed = 0;
-
-            while (!Main.InputProcessor.KeyPressed && elapsed < timeoutSeconds)
+            while (Responses.Count == NumberOfResponses && Time.time - startTime < secondsToWait)
             {
-                elapsed = Time.time - startTime;
-
                 yield return null;
             }
+            KeyPressedEvent.RemoveListener(OnKeyPressed);
 
-            var responseTime = (int)((Main.InputProcessor.KeyPressedTime - PresentationStartTime) * 1000);
-            var response = Main.InputProcessor.KeyPressed ? new Response(true, responseTime) : new Response(false);
+            // Not seen
+            if (Responses.Count == NumberOfResponses)
+            {
+                Responses.Add(new Response(false));
+            }
 
-            Responses.Add(response);
-
-            Debug.Log("Responses count: " + Responses.Count);
-            Debug.Log("Response: " + Responses[^1].Seen);
-            Debug.Log("Response time: " + Responses[^1].Time);
-
-            // Send Response
-            var lastResponse = Main.PresentationControl.Responses[previousCount];
+            // Send first response added in the response window.
+            var lastResponse = Main.Draw.Responses[NumberOfResponses]; // NumberOfResponses + 1 because of indexing
 
             // Convert the string data to byte data using ASCII encoding.  
-            List<byte> byteList = new List<byte>();
-            byteList.AddRange(BitConverter.GetBytes(lastResponse.Seen));
-            byteList.AddRange(BitConverter.GetBytes(lastResponse.Time));
+            List<byte> byteData = new List<byte>();
+            byteData.AddRange(BitConverter.GetBytes(lastResponse.Seen));
+            byteData.AddRange(BitConverter.GetBytes(lastResponse.Time));
 
-            var byteData = byteList.ToArray();
-
-            Main.Server.Write(byteData);
-            Debug.Log("Found response.");
+            Main.Server.Write(byteData.ToArray());
+            Debug.Log("Presentation completed.");
         }
 
         private void SetLevel(float percent)
@@ -251,5 +256,7 @@ namespace FieldofVision
                     break;
             }
         }
+
+        #endregion
     }
 }

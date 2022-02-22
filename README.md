@@ -1,20 +1,25 @@
 # Field-of-Vision-R
 
-## Install this version of OPI
-
+## Installation
 ```R
 detach("package:OPI", unload = TRUE)
 install.packages("~/GitHub/OPI-R/pkg/OPI_2.9.3.tar.gz", repos = NULL, type = "source")
 ```
 
-## Start Library
+## Library
 ```R
 require("OPI")
 chooseOpi("Vive")
+```
+
+## opiInitialize
+Opens a connection to the socket server. The Vive application must already be running.
+```R
 opiInitialize()
 ```
 
 ## opiSetBackground
+Updates the background and fixation point with the following parameters. Parameters with a "default" value are optional.
 | Parameters      | Description |
 | -----------     | ----------- |
 | lum             | Currently ignored. Background opacity, as a percentage, between 0.00 and 100.00 (default).|
@@ -28,6 +33,9 @@ opiInitialize()
 | fix_rgb         | Color of the fixation target as string of RGB values separated by spaces, such as '255 255 255', optional, overrides fix_color parameter. |
 | eye             | Sets the background configuration, can be 'left', 'right', or 'both' (default). |
 
+| Returns      | Description |
+| -----------     | ----------- |
+| Boolean             | True on success, false on failure. |
 ```R
 opiSetBackground(lum=100, color="black", rgb="NULL NULL NULL", fixation="Cross", 
                  fix_cx=0.0, fix_cy=0.0, fix_sx=1.0, fix_sy=1.0, fix_lum=100.00,
@@ -35,6 +43,7 @@ opiSetBackground(lum=100, color="black", rgb="NULL NULL NULL", fixation="Cross",
 ```
 
 ## opiPresent
+Presents a stimulus defined with the following parameters. Parameters with a "default" value are optional.
 | Parameters      | Description |
 | -----------     | ----------- |
 | stim            | The stimulus object to present. |
@@ -61,7 +70,10 @@ opiPresent(stim)
 ```
 
 ## opiClose
-Returns true.
+Closes the connection and shuts down the application.
+| Returns      | Description |
+| -----------     | ----------- |
+| Boolean             | True on success, false on failure. |
 
 ```R
 opiClose()

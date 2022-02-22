@@ -116,3 +116,5 @@ Packages/System.Runtime.Extensions.4.3.1/ref/xamarinwatchos10/_._
 Packages/System.Runtime.Extensions.4.3.1/System.Runtime.Extensions.4.3.1.nupkg
 Packages/System.Runtime.Extensions.4.3.1/ThirdPartyNotices.txt
 UserSettings/Layouts/default-2021.dwlt
+*.log
+Logs/shadercompiler-UnityShaderCompiler.exe0.log
